@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
+import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
+import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 class StationCard extends StatelessWidget{
   final String nom;
   final String adresse;
@@ -28,19 +30,27 @@ class StationCard extends StatelessWidget{
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(nom, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
-                  const SizedBox(height: 4),
-                  Text(adresse),
-                  const SizedBox(height: 8),
-                  Text('${distance.toStringAsFixed(1)} km . $temps min'),
+                  Text(nom, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.titreCarte),
+                  const SizedBox(height: 2),
+                  Text(adresse, maxLines: 1, overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.texteSecondaire),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text('${distance.toStringAsFixed(1).replaceAll('.', ',')} km · $temps min',
+                      style: AppTextStyle.metaPetite),
                 ],
               ),
             ),
-            Text('${prix.toStringAsFixed(3) } €/L',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 20
-              ),
-            )
+            const SizedBox(width: AppSpacing.xs),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(prix.toStringAsFixed(3).replaceAll('.', ','),
+                    style: AppTextStyle.prixCarte.copyWith(color: AppColors.economie)),
+                Text('€/L', style: AppTextStyle.metaPetite),
+                Text('€/L', style: AppTextStyle.metaDonnee.copyWith(fontSize: 12)),
+              ],
+            ),
           ],
         ),
       ),
