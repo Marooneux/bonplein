@@ -3,17 +3,6 @@ import 'package:bonplein_flutter/domain/models/type_carburant.dart';
 import 'package:bonplein_flutter/utils/math_utils.dart';
 
 class Station {
-  final int id;
-  final String nom;
-  final String adresse;
-  final String ville;
-  final String codePostal;
-  final double latitude;
-  final double longitude;
-  final bool surAutoroute;
-  final List<Carburant> carburants;
-  final List<String> services;
-
   const Station({
     required this.id,
     required this.nom,
@@ -26,6 +15,16 @@ class Station {
     required this.carburants,
     required this.services,
   });
+  final int id;
+  final String nom;
+  final String adresse;
+  final String ville;
+  final String codePostal;
+  final double latitude;
+  final double longitude;
+  final bool surAutoroute;
+  final List<Carburant> carburants;
+  final List<String> services;
 
   /// Renvoie le prix du carburant pour cette station
   double? prixPourCarburant(TypeCarburant type) {
