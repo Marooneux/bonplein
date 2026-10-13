@@ -49,7 +49,7 @@ class _MapWidgetState extends State<MapWidget> {
         child: FlutterMap(
           options: const MapOptions(
             initialCenter: LatLng(43.604, 1.444),
-            initialZoom: 13,
+            initialZoom: 14,
           ),
           children: [
             TileLayer(
@@ -59,6 +59,9 @@ class _MapWidgetState extends State<MapWidget> {
             const RichAttributionWidget(
               attributions: [TextSourceAttribution('OpenStreetMap contributors')],
             ),
+            CurrentLocationLayer(
+              alignPositionOnUpdate: AlignOnUpdate.always,
+            ), // User location
           ],
         ),
       ),
