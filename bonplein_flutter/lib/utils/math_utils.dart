@@ -11,7 +11,7 @@ double calculerDistanceKm({
   required double lat2,
   required double lon2,
 }) {
-  const double rayonTerreKm = 6371.0;
+  const rayonTerreKm = 6371.0;
   final dLat = deg2rad(lat2 - lat1);
   final dLon = deg2rad(lon2 - lon1);
 
