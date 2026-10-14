@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bonplein_flutter/ui/page1/accueil.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,7 +12,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = const [
-    Center(child: Text('Map')),
+    Center(child: Accueil()),
     Center(child: Text('Trajets')),
     Center(child: Text('Notifications')),
     Center(child: Text('Statistiques')),
