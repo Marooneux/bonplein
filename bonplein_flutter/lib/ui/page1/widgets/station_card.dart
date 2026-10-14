@@ -54,7 +54,7 @@ class StationCard extends StatelessWidget {
                 Text(
                   prix.toStringAsFixed(3).replaceAll('.', ','),
                   style: AppTextStyle.prixCarte.copyWith(
-                    color: AppColors.economie,
+                    color: AppColors.vert,
                   ),
                 ),
                 Text('€/L', style: AppTextStyle.metaPetite),

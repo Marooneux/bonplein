@@ -34,24 +34,24 @@ abstract final class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: AppColors.slate50,
+      scaffoldBackgroundColor: AppColors.neutral50,
       textTheme: textTheme,
-      iconTheme: const IconThemeData(color: AppColors.navigation),
+      iconTheme: const IconThemeData(color: AppColors.blueFonce),
 
       colorScheme: const ColorScheme.light(
-        primary: AppColors.economie,
-        secondary: AppColors.vigilance,
+        primary: AppColors.vert,
+        secondary: AppColors.orange,
         onSecondary: AppColors.blanc,
-        error: AppColors.prixEleve,
-        onSurface: AppColors.navigation,
-        outline: AppColors.slate200,
-        outlineVariant: AppColors.slate200,
+        error: AppColors.rouge,
+        onSurface: AppColors.blueFonce,
+        outline: AppColors.neutral200,
+        outlineVariant: AppColors.neutral200,
       ),
 
       // Top bar
       appBarTheme: AppBarThemeData(
-        backgroundColor: AppColors.slate50,
-        foregroundColor: AppColors.navigation,
+        backgroundColor: AppColors.neutral50,
+        foregroundColor: AppColors.blueFonce,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -67,14 +67,14 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.md),
-          side: const BorderSide(color: AppColors.slate200),
+          side: const BorderSide(color: AppColors.neutral200),
         ),
       ),
 
       // Green button: "Démarrer l'itinéraire", "Créer"
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.economie,
+          backgroundColor: AppColors.vert,
           foregroundColor: AppColors.blanc,
           elevation: 0,
           minimumSize: const Size.fromHeight(48),
@@ -86,7 +86,7 @@ abstract final class AppTheme {
       // Dark button: "Rechercher", "Voir le meilleur prix"
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.navigation,
+          backgroundColor: AppColors.blueFonce,
           foregroundColor: AppColors.blanc,
           minimumSize: const Size.fromHeight(48),
           shape: buttonShape,
@@ -97,8 +97,8 @@ abstract final class AppTheme {
       // Fuel chips: SP95, SP98, Gazole etc (selected = green)
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.blanc,
-        selectedColor: AppColors.economie,
-        side: const BorderSide(color: AppColors.slate200),
+        selectedColor: AppColors.vert,
+        side: const BorderSide(color: AppColors.neutral200),
         shape: const StadiumBorder(),
         showCheckmark: false,
         labelStyle: AppTextStyle.label.copyWith(fontSize: 13, letterSpacing: 0),
@@ -112,20 +112,20 @@ abstract final class AppTheme {
       // Search bar and address fields
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,
-        fillColor: AppColors.slate100,
+        fillColor: AppColors.neutral100,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
           vertical: 14,
         ),
         hintStyle: AppTextStyle.body.copyWith(
-          color: AppColors.slate400,
+          color: AppColors.neutral400,
           fontSize: 15,
         ),
-        prefixIconColor: AppColors.slate400,
+        prefixIconColor: AppColors.neutral400,
         border: fieldBorder,
         enabledBorder: fieldBorder,
         focusedBorder: fieldBorder.copyWith(
-          borderSide: const BorderSide(color: AppColors.economie, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.vert, width: 1.5),
         ),
       ),
 
@@ -135,13 +135,13 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         height: 68,
-        indicatorColor: AppColors.economie.withValues(alpha: 0.12),
+        indicatorColor: AppColors.vert.withValues(alpha: 0.12),
         iconTheme: WidgetStateProperty.resolveWith(
           (states) => IconThemeData(
             size: 24,
             color: states.contains(WidgetState.selected)
-                ? AppColors.economie
-                : AppColors.slate400,
+                ? AppColors.vert
+                : AppColors.neutral400,
           ),
         ),
         labelTextStyle: WidgetStateProperty.resolveWith(
@@ -149,8 +149,8 @@ abstract final class AppTheme {
             fontSize: 11,
             letterSpacing: 0,
             color: states.contains(WidgetState.selected)
-                ? AppColors.economie
-                : AppColors.slate400,
+                ? AppColors.vert
+                : AppColors.neutral400,
           ),
         ),
       ),
@@ -166,7 +166,7 @@ abstract final class AppTheme {
         ),
       ),
       dividerTheme: const DividerThemeData(
-        color: AppColors.slate200,
+        color: AppColors.neutral200,
         thickness: 1,
         space: 1,
       ),
