@@ -13,10 +13,14 @@ dependencies:
   dio: ^5.11.1
   flutter:
     sdk: flutter
+  flutter_map: ^8.3.2
+  flutter_map_location_marker: ^10.3.0
   freezed_annotation: ^3.1.0
+  geolocator: ^14.1.1
   google_fonts: ^9.0.0
   json_annotation: ^4.12.0
   json_serializable: ^6.14.1
+  latlong2: ^0.9.1
   retrofit: ^4.10.0
 
 dev_dependencies:
@@ -25,6 +29,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^4.0.0-dev.3
+  geolocator_platform_interface: ^4.4.0
+  plugin_platform_interface: ^2.1.8
   retrofit_generator: ^10.2.9
   very_good_analysis: ^10.3.0
 
