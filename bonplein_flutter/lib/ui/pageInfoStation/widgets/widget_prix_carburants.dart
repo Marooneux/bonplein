@@ -1,19 +1,8 @@
-
 import 'package:flutter/material.dart';
+import 'package:bonplein_flutter/domain/models/station_service.dart';
 
 // Affiche les prix et la disponibilité des carburants d'une station.
-Widget buildPrixCarburants() {
-// Données temporaires en attendant de connecter l'API.
-// Un prix à null signifie que le carburant est indisponible.
-  final carburants = [
-    {'nom': 'SP95', 'prix': '1,719 €/L'},
-    {'nom': 'SP95-E10', 'prix': '1,689 €/L'},
-    {'nom': 'SP98', 'prix': '1,829 €/L'},
-    {'nom': 'Gazole', 'prix': '1,659 €/L'},
-    {'nom': 'E85', 'prix': null},
-    {'nom': 'GPL-c', 'prix': null},
-  ];
-
+Widget buildPrixCarburants(Station station) {
   return Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
@@ -31,7 +20,6 @@ Widget buildPrixCarburants() {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Titre de la section.
         const Text(
           'Prix des carburants',
           style: TextStyle(
@@ -42,15 +30,10 @@ Widget buildPrixCarburants() {
         ),
 
         const SizedBox(height: 12),
-        // Séparation entre le titre et la liste.
         const Divider(color: Colors.black12),
         const SizedBox(height: 8),
-
-        // Affiche chaque carburant avec son prix ou son statut.
-        ...carburants.map((carburant) {
-          final prix = carburant['prix'];
-          final disponible = prix != null;
-
+        // Affiche les carburants présents dans le modèle Station.
+        ...station.carburants.map((carburant) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Row(
@@ -58,20 +41,19 @@ Widget buildPrixCarburants() {
               children: [
                 // Nom du carburant.
                 Text(
-                  carburant['nom']!,
-                  style: TextStyle(
-                    color: disponible ? Colors.black87 : Colors.grey,
+                  carburant.type.nom,
+                  style: const TextStyle(
+                    color: Colors.black87,
                   ),
                 ),
-
-                // Prix si disponible, statut sinon.
-              Text(
-                prix ?? 'Indisponible',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: disponible ? Colors.black87 : Colors.grey,
+                // Prix au litre.
+                Text(
+                  '${carburant.prix.toStringAsFixed(3).replaceAll('.', ',')} €/L',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black87,
+                  ),
                 ),
-              ),
               ],
             ),
           );
@@ -80,4 +62,3 @@ Widget buildPrixCarburants() {
     ),
   );
 }
-

@@ -18,10 +18,10 @@ Widget buildDistanceTrajet() => Container(
   child: Row(
     children: [
       // Distance
-      Expanded(
+      const Expanded(
         child: Column(
           children: [
-            const Text(
+            Text(
               '0,8 km',
               style: TextStyle(
                 fontSize: 22,
@@ -29,8 +29,8 @@ Widget buildDistanceTrajet() => Container(
                 color: Colors.green,
               ),
             ),
-            const SizedBox(height: 4),
-            const Text(
+            SizedBox(height: 4),
+            Text(
               'Distance',
               style: TextStyle(
                 fontSize: 14,
@@ -49,10 +49,10 @@ Widget buildDistanceTrajet() => Container(
       ),
 
       // Temps de trajet
-      Expanded(
+      const Expanded(
         child: Column(
           children: [
-            const Text(
+            Text(
               '4 min',
               style: TextStyle(
                 fontSize: 22,
@@ -60,8 +60,8 @@ Widget buildDistanceTrajet() => Container(
                 color: Colors.green,
               ),
             ),
-            const SizedBox(height: 4),
-            const Text(
+            SizedBox(height: 4),
+            Text(
               'Trajet en voiture',
               style: TextStyle(
                 fontSize: 14,

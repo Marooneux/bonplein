@@ -5,6 +5,7 @@ import 'widgets/widget_nom_station.dart';
 import 'widgets/widget_distance_trajet.dart';
 import '../page1/widgets/searchBar.dart';
 import '../core/widgets/widget_filtres_carburant.dart';
+import 'package:bonplein_flutter/domain/models/station_service.dart';
 
 // ============================================================
 // PAGE : Informations détaillées d'une station
@@ -23,17 +24,20 @@ import '../core/widgets/widget_filtres_carburant.dart';
 // sélectionnée, des carburants disponibles et de l'adresse du client.
 // ============================================================
 
+
+
 class PageInfoStation extends StatefulWidget {
 
-  // TODO : récupérer la station sélectionnée depuis la page précédente.
-  // Exemple : final Station station;
-  // La station sera transmise au constructeur avec un paramètre requis.
+  //station test
+  final Station station;
 
-  const PageInfoStation({super.key,});
+  const PageInfoStation({
+    super.key,
+    required this.station,
+  });
 
   @override
   State<PageInfoStation> createState() => _PageInfoStationState();
-
 }
 
 class _PageInfoStationState extends State<PageInfoStation>{
@@ -88,7 +92,7 @@ class _PageInfoStationState extends State<PageInfoStation>{
       children: [
 
         // Section 1 : Nom et adresse de la station
-        buildNomParking(),
+        buildNomParking(widget.station),
         const SizedBox(height: 24),
 
         // Section 2 : Distance et temps de trajet
@@ -96,7 +100,7 @@ class _PageInfoStationState extends State<PageInfoStation>{
         const SizedBox(height: 24),
 
         // Section 3 : Prix des carburants
-        buildPrixCarburants()
+        buildPrixCarburants(widget.station)
       ],
     ),
   );
@@ -123,7 +127,7 @@ class _PageInfoStationState extends State<PageInfoStation>{
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Nom et adresse
-              buildNomParking(),
+              buildNomParking(widget.station),
 
               const SizedBox(height: 24),
 
@@ -140,7 +144,7 @@ class _PageInfoStationState extends State<PageInfoStation>{
         Expanded(
           flex: 2,
           child: SingleChildScrollView(
-            child: buildPrixCarburants(),
+            child: buildPrixCarburants(widget.station),
           ),
         ),
       ],
