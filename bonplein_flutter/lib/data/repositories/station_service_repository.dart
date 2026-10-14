@@ -1,14 +1,11 @@
-import 'package:dio/dio.dart';
-
 import 'package:bonplein_flutter/data/api_models/carburant_api_model.dart';
 import 'package:bonplein_flutter/data/services/api/carburant_api_service.dart';
 import 'package:bonplein_flutter/domain/models/carburant.dart';
 import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:bonplein_flutter/domain/models/type_carburant.dart';
+import 'package:dio/dio.dart';
 
 class StationServiceRepository {
-  final CarburantsApi _api;
-
   StationServiceRepository({CarburantsApi? api})
     : _api =
           api ??
@@ -20,10 +17,12 @@ class StationServiceRepository {
               ),
             ),
           );
+  final CarburantsApi _api;
 
-  /// Recherche les stations situées dans un rayon (en km) autour des coordonnées GPS fournies.
-  /// Si un [carburant] est spécifié, seules les stations proposant ce carburant sont retournées,
-  /// les résultats sont triés par prix croissant.
+  /// Recherche les stations situées dans un rayon (en km) autour des
+  /// coordonnées GPS fournies. Si un [carburant] est spécifié, seules les
+  /// stations proposant ce carburant sont retournées, les résultats sont triés
+  /// par prix croissant.
   Future<List<Station>> getStationsProches({
     required double latitude,
     required double longitude,
@@ -100,7 +99,8 @@ class StationServiceRepository {
     return reponse.results.map(_mapperVersStation).toList();
   }
 
-  /// Convertit le modèle de l'API [StationService] vers le modèle domaine [Station].
+  /// Convertit le modèle de l'API [StationService] vers le modèle domaine
+  /// [Station].
   Station _mapperVersStation(StationService dto) {
     final carburants = <Carburant>[];
 
@@ -169,11 +169,12 @@ class StationServiceRepository {
     );
   }
 
-  /// Renvoie les coordonnées de secours sous forme de chaîne entière (ex: "4818300" -> 48.183).
+  /// Renvoie les coordonnées de secours sous forme de chaîne entière (ex:
+  /// "4818300" -> 48.183).
   double _parserCoordonnee(String? valeur) {
-    if (valeur == null || valeur.isEmpty) return 0.0;
+    if (valeur == null || valeur.isEmpty) return 0;
     final parsed = double.tryParse(valeur);
-    if (parsed == null) return 0.0;
+    if (parsed == null) return 0;
 
     if (parsed.abs() > 180) {
       return parsed / 100000.0;

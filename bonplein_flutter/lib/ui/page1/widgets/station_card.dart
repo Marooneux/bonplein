@@ -1,34 +1,39 @@
 import 'package:flutter/material.dart';
 
-class StationCard extends StatelessWidget{
+class StationCard extends StatelessWidget {
+  const StationCard({
+    required this.nom,
+    required this.adresse,
+    required this.prix,
+    required this.distance,
+    required this.temps,
+    super.key,
+  });
   final String nom;
   final String adresse;
   final double prix;
   final double distance;
   final int temps;
 
-  const StationCard ({
-    super.key,
-    required this.nom,
-    required this.adresse,
-    required this.prix,
-    required this.distance,
-    required this.temps
-  });
-
   @override
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Padding(
-          padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Row(
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(nom, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+                  Text(
+                    nom,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(adresse),
                   const SizedBox(height: 8),
@@ -36,11 +41,10 @@ class StationCard extends StatelessWidget{
                 ],
               ),
             ),
-            Text('${prix.toStringAsFixed(3) } €/L',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold, fontSize: 20
-              ),
-            )
+            Text(
+              '${prix.toStringAsFixed(3)} €/L',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
           ],
         ),
       ),

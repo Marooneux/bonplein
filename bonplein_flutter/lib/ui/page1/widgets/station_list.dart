@@ -1,9 +1,9 @@
+import 'package:bonplein_flutter/ui/page1/widgets/station_card.dart';
 import 'package:flutter/material.dart';
-import 'station_card.dart';
 
-class StationList extends StatelessWidget{
+class StationList extends StatelessWidget {
+  const StationList({required this.stations, super.key});
   final List<StationCard> stations;
-  const StationList({super.key, required this.stations});
 
   @override
   Widget build(BuildContext context) {
@@ -12,5 +12,4 @@ class StationList extends StatelessWidget{
       itemBuilder: (context, index) => stations[index],
     );
   }
-
 }

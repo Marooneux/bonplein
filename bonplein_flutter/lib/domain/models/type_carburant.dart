@@ -6,8 +6,8 @@ enum TypeCarburant {
   e85('E85', 'e85_prix'),
   gplc('GPLc', 'gplc_prix');
 
+  const TypeCarburant(this.nom, this.champApi);
+
   final String nom;
   final String champApi;
-
-  const TypeCarburant(this.nom, this.champApi);
 }
