@@ -45,3 +45,9 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+ios/Runner.xcodeproj/project.pbxproj
+../.DS_Store
+lib/ui/core/widgets/app_elevated_button.dart
+macos/Flutter/ephemeral/.swift_pm.lock
+macos/Flutter/ephemeral/Packages/
