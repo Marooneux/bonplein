@@ -58,10 +58,6 @@ class StationCard extends StatelessWidget {
                   ),
                 ),
                 Text('€/L', style: AppTextStyle.metaPetite),
-                Text(
-                  '€/L',
-                  style: AppTextStyle.metaDonnee.copyWith(fontSize: 12),
-                ),
               ],
             ),
           ],
