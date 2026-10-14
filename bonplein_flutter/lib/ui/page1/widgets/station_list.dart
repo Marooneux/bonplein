@@ -1,29 +1,43 @@
 import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
+import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
+import 'package:bonplein_flutter/ui/page1/widgets/station_card.dart';
 import 'package:flutter/material.dart';
-import '../../core/themes/app_spacing.dart';
-import 'station_card.dart';
 
-class StationList extends StatelessWidget{
+class StationList extends StatelessWidget {
+  const StationList({
+    required this.stations,
+    super.key,
+    this.emptyMessage = 'Essayez une autre adresse.',
+  });
   final List<StationCard> stations;
-  const StationList({super.key, required this.stations});
+  final String emptyMessage;
 
   @override
   Widget build(BuildContext context) {
     if (stations.isEmpty) {
       return Center(
         child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.local_gas_station, size: 48, color: AppColors.slate300),
+              const Icon(
+                Icons.local_gas_station,
+                size: 48,
+                color: AppColors.slate300,
+              ),
               const SizedBox(height: AppSpacing.sm),
-              Text('Aucune station disponible', style: AppTextStyle.titrePrincipal),
+              Text(
+                'Aucune station disponible',
+                style: AppTextStyle.titrePrincipal,
+              ),
               const SizedBox(height: 4),
-              Text('Essayez une autre adresse.',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyle.body.copyWith(color: AppColors.slate500)),
+              Text(
+                emptyMessage,
+                textAlign: TextAlign.center,
+                style: AppTextStyle.body.copyWith(color: AppColors.slate500),
+              ),
             ],
           ),
         ),
@@ -35,5 +49,4 @@ class StationList extends StatelessWidget{
       itemBuilder: (context, index) => stations[index],
     );
   }
-
 }
