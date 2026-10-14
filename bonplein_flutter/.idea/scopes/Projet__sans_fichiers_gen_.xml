@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Projet (sans fichiers gen)" pattern="(file[bonplein_flutter]:.idea/libraries//*||file[bonplein_flutter]:*/)&amp;&amp;!file[bonplein_flutter]:.idea//*&amp;&amp;!file[bonplein_flutter]:android//*&amp;&amp;!file[bonplein_flutter]:ios//*&amp;&amp;!file:.gitignore&amp;&amp;!file:.metadata&amp;&amp;!file:bonplein_flutter.iml&amp;&amp;!file:pubspec.lock&amp;&amp;!file:*.g.dart&amp;&amp;!file:*.freezed.dart&amp;&amp;!file[bonplein_flutter]:lib/ui/core/l10n/generated//*&amp;&amp;!file[bonplein_flutter]:lib/l10n/generated//*" />
+</component>
