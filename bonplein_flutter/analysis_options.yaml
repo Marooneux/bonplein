@@ -45,3 +45,6 @@ analyzer:
     - "**/generated/**"
     - "build/**"
     - ".dart_tool/**"
+    - android/**
+    - ios/**
+    - macos/**
