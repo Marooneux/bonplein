@@ -25,7 +25,7 @@ class StationList extends StatelessWidget {
               const Icon(
                 Icons.local_gas_station,
                 size: 48,
-                color: AppColors.slate300,
+                color: AppColors.neutral300,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
@@ -36,7 +36,7 @@ class StationList extends StatelessWidget {
               Text(
                 emptyMessage,
                 textAlign: TextAlign.center,
-                style: AppTextStyle.body.copyWith(color: AppColors.slate500),
+                style: AppTextStyle.body.copyWith(color: AppColors.neutral500),
               ),
             ],
           ),
