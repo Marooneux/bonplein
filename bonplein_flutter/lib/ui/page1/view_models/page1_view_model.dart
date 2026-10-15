@@ -1,12 +1,15 @@
-import 'package:dio/dio.dart';
+import 'dart:async';
 import 'dart:math' show max, min;
+
 import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:bonplein_flutter/domain/models/type_carburant.dart';
 import 'package:bonplein_flutter/utils/math_utils.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
 typedef Coordonnees = ({double latitude, double longitude});
+typedef AddressSuggestion = ({String label, double latitude, double longitude});
 
 enum PriceLevel { bas, moyen, eleve }
 
@@ -27,6 +30,13 @@ class Page1ViewModel extends ChangeNotifier {
       : _repository = repository;
 
   final StationServiceRepository _repository;
+  final Dio _dio = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
+    ),
+  );
+
   Coordonnees? _position;
   String? _positionLabel;
   TypeCarburant _carburant = TypeCarburant.sp95;
@@ -39,6 +49,10 @@ class Page1ViewModel extends ChangeNotifier {
   int _requestId = 0;
   bool _disposed = false;
 
+  List<AddressSuggestion> _suggestions = [];
+  Timer? _debounce;
+  int _addressRequestId = 0;
+
   Coordonnees? get position => _position;
   String? get positionLabel => _positionLabel;
   TypeCarburant get carburant => _carburant;
@@ -47,6 +61,7 @@ class Page1ViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasLocation => _position != null;
+  List<AddressSuggestion> get suggestions => _suggestions;
 
   double? prixDe(Station station) {
     for (final c in station.carburants) {
@@ -91,6 +106,56 @@ class Page1ViewModel extends ChangeNotifier {
     return loadStations();
   }
 
+  /// Appelée à chaque lettre tapée dans la barre de recherche.
+  void searchAddress(String text) {
+    _debounce?.cancel();
+    final query = text.trim();
+    if (query.length < 3) {
+      _addressRequestId++;
+      _suggestions = [];
+      _notify();
+      return;
+    }
+    // On attend 400 ms sans frappe avant d'appeler l'API.
+    _debounce = Timer(const Duration(milliseconds: 400), () async {
+      final requestId = ++_addressRequestId;
+      try {
+        final result = await _fetchAddresses(query);
+        if (requestId != _addressRequestId) return;
+        _suggestions = result;
+      } on Exception {
+        if (requestId != _addressRequestId) return;
+        _suggestions = [];
+      }
+      _notify();
+    });
+  }
+
+  Future<List<AddressSuggestion>> _fetchAddresses(String query) async {
+    final response = await _dio.get<Map<String, dynamic>>(
+      'https://data.geopf.fr/geocodage/search',
+      queryParameters: {'q': query, 'limit': 5},
+    );
+    final features = (response.data?['features'] as List<dynamic>?) ?? [];
+    return [
+      for (final f in features)
+        (
+        label: f['properties']['label'] as String,
+        longitude: (f['geometry']['coordinates'][0] as num).toDouble(),
+        latitude: (f['geometry']['coordinates'][1] as num).toDouble(),
+        ),
+    ];
+  }
+
+  /// L'utilisateur choisit une adresse dans la liste.
+  Future<void> selectSuggestion(AddressSuggestion s) {
+    _suggestions = [];
+    return selectLocation(
+      s.label,
+      (latitude: s.latitude, longitude: s.longitude),
+    );
+  }
+
   /// Bouton de carburant (SP95, SP98, Gazole, E85, GPL).
   Future<void> selectFuel(String bouton) async {
     final carburant = _carburantDepuisBouton(bouton);
@@ -109,7 +174,7 @@ class Page1ViewModel extends ChangeNotifier {
   Future<void> loadStations() async {
     final position = _position;
     if (position == null) {
-      _notify(); // pas encore de position : rien à chercher
+      _notify();
       return;
     }
 
@@ -127,12 +192,11 @@ class Page1ViewModel extends ChangeNotifier {
       );
       if (requestId != _requestId) return;
       _applyResult(result);
-    } on Exception catch (e) {
-      // TEMPORAIRE : pour voir la vraie cause de l'erreur
-      if (e is DioException) {
-        debugPrint('API ${e.response?.statusCode} : ${e.response?.data}');
-      }
-      debugPrint('ERREUR API : $e');
+    } on Exception {
+      if (requestId != _requestId) return;
+      _stations = [];
+      _selected = null;
+      _errorMessage = 'Impossible de charger les stations.';
     }
 
     _isLoading = false;
@@ -146,7 +210,6 @@ class Page1ViewModel extends ChangeNotifier {
     _prixMin = prix.isEmpty ? 0 : prix.reduce(min);
     _prixMax = prix.isEmpty ? 0 : prix.reduce(max);
 
-    // l'ancienne sélection n'est plus valable.
     _selected = null;
   }
 
@@ -157,6 +220,7 @@ class Page1ViewModel extends ChangeNotifier {
   @override
   void dispose() {
     _disposed = true;
+    _debounce?.cancel();
     super.dispose();
   }
 }
