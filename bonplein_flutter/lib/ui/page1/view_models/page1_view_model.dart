@@ -27,7 +27,6 @@ class Page1ViewModel extends ChangeNotifier {
       : _repository = repository;
 
   final StationServiceRepository _repository;
-
   Coordonnees? _position;
   String? _positionLabel;
   TypeCarburant _carburant = TypeCarburant.sp95;
@@ -65,6 +64,12 @@ class Page1ViewModel extends ChangeNotifier {
       lat2: station.latitude,
       lon2: station.longitude,
     );
+  }
+
+  int? tempsTrajetMin(Station station) {
+    final km = distanceKm(station);
+    if (km == null) return null;
+    return calculerTempsTrajetEnMinutes(km, 40);
   }
 
   /// Vert, orange ou rouge, selon le prix par rapport aux autres stations.
