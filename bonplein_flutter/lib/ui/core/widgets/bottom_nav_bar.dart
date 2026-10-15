@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
+import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
 import 'package:bonplein_flutter/ui/page1/accueil.dart';
 
 class HomePage extends StatefulWidget {
@@ -30,9 +32,9 @@ class _HomePageState extends State<HomePage> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
-        selectedItemColor: const Color(0xFF22C55E),
-        unselectedItemColor: Colors.grey,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+        selectedItemColor: AppColors.vert,
+        unselectedItemColor: AppColors.neutral500,
+        selectedLabelStyle: AppTextStyle.navLabel,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.map_outlined), label: 'Carte'),
           BottomNavigationBarItem(icon: Icon(Icons.cable_outlined), label: 'Trajets'),

@@ -5,9 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="98f7129f-a36c-4410-affc-d588234accad" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/bonplein_flutter/analysis_options.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/analysis_options.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bonplein_flutter/lib/ui/core/widgets/bottom_nav_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/lib/ui/core/widgets/bottom_nav_bar.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bonplein_flutter/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/bonplein_flutter/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bonplein_flutter/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/pubspec.yaml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +47,7 @@
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;dart.analysis.tool.window.visible&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;filters&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;bottom__nav__bar&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/Etudiant/Documents/GitHub/bonplein/bonplein_flutter/lib/ui/page2/view_models&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;dart.settings&quot;,

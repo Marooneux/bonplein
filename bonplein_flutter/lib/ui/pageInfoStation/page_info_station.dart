@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'widgets/widget_prix_carburants.dart';
 import 'widgets/widget_nom_station.dart';
 import 'widgets/widget_distance_trajet.dart';
-import '../page1/widgets/search_bar.dart';
-import '../core/widgets/widget_filtres_carburant.dart';
 
 // ============================================================
 // PAGE : Informations détaillées d'une station
