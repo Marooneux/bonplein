@@ -4,7 +4,6 @@ import 'package:bonplein_flutter/domain/models/type_carburant.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 import 'package:bonplein_flutter/ui/core/widgets/widget_filtres_carburant.dart';
 import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
-import 'package:bonplein_flutter/ui/page1/widgets/station_card.dart';
 import 'package:bonplein_flutter/ui/page1/widgets/station_list.dart';
 import 'package:bonplein_flutter/ui/page2/widgets/station_sort_bar.dart';
 import 'package:flutter/material.dart';
@@ -73,17 +72,6 @@ class StationsProchesPage extends StatelessWidget {
     if (erreur != null) {
       return Center(child: Text(erreur));
     }
-    return StationList(
-      stations: [
-        for (final station in viewModel.stations)
-          StationCard(
-            ville: '${station.codePostal} ${station.ville}'.trim(),
-            adresse: station.adresse,
-            prix: viewModel.prixDe(station) ?? 0,
-            distance: viewModel.distanceKm(station) ?? 0,
-            temps: viewModel.tempsTrajetMin(station) ?? 0,
-          ),
-      ],
-    );
+    return StationList(stations: viewModel.stations, viewModel: viewModel);
   }
 }

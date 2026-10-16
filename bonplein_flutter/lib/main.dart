@@ -1,5 +1,6 @@
+import 'package:bonplein_flutter/ui/core/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
-import 'ui/core/widgets/bottom_nav_bar.dart';
+
 void main() {
   runApp(const MyApp());
 }

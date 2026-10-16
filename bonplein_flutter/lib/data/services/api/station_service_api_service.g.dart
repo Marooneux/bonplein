@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'carburant_api_service.dart';
+part of 'station_service_api_service.dart';
 
 // dart format off
 
@@ -8,10 +8,11 @@ part of 'carburant_api_service.dart';
 // RetrofitGenerator
 // **************************************************************************
 
+// ignore_for_file: type=lint
 // ignore_for_file: unnecessary_brace_in_string_interps,no_leading_underscores_for_local_identifiers,unused_element,unnecessary_string_interpolations,unused_element_parameter,avoid_unused_constructor_parameters,unreachable_from_main,avoid_redundant_argument_values
 
-class _CarburantsApi implements CarburantsApi {
-  _CarburantsApi(this._dio, {this.baseUrl, this.errorLogger}) {
+class _StationServiceApi implements StationServiceApi {
+  _StationServiceApi(this._dio, {this.baseUrl, this.errorLogger}) {
     baseUrl ??= 'https://data.economie.gouv.fr/api/explore/v2.1';
   }
 

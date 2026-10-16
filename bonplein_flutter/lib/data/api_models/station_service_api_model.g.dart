@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'carburant_api_model.dart';
+part of 'station_service_api_model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

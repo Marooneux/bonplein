@@ -1,17 +1,27 @@
-
+import 'package:bonplein_flutter/domain/models/carburant.dart';
+import 'package:bonplein_flutter/domain/models/type_carburant.dart';
 import 'package:flutter/material.dart';
 
 // Affiche les prix et la disponibilité des carburants d'une station.
-Widget buildPrixCarburants() {
-// Données temporaires en attendant de connecter l'API.
-// Un prix à null signifie que le carburant est indisponible.
+Widget buildPrixCarburants(List<Carburant> disponibles) {
+  // Renvoie le prix formaté du carburant, ou null s'il est indisponible.
+  String? prixDe(TypeCarburant type) {
+    for (final c in disponibles) {
+      if (c.type == type) {
+        return '${c.prix.toStringAsFixed(3).replaceAll('.', ',')} €/L';
+      }
+    }
+    return null;
+  }
+
+  // Un prix à null signifie que le carburant est indisponible.
   final carburants = [
-    {'nom': 'SP95', 'prix': '1,719 €/L'},
-    {'nom': 'SP95-E10', 'prix': '1,689 €/L'},
-    {'nom': 'SP98', 'prix': '1,829 €/L'},
-    {'nom': 'Gazole', 'prix': '1,659 €/L'},
-    {'nom': 'E85', 'prix': null},
-    {'nom': 'GPL-c', 'prix': null},
+    {'nom': 'SP95', 'prix': prixDe(TypeCarburant.sp95)},
+    {'nom': 'SP95-E10', 'prix': prixDe(TypeCarburant.e10)},
+    {'nom': 'SP98', 'prix': prixDe(TypeCarburant.sp98)},
+    {'nom': 'Gazole', 'prix': prixDe(TypeCarburant.gazole)},
+    {'nom': 'E85', 'prix': prixDe(TypeCarburant.e85)},
+    {'nom': 'GPL-c', 'prix': prixDe(TypeCarburant.gplc)},
   ];
 
   return Container(
@@ -65,13 +75,13 @@ Widget buildPrixCarburants() {
                 ),
 
                 // Prix si disponible, statut sinon.
-              Text(
-                prix ?? 'Indisponible',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  color: disponible ? Colors.black87 : Colors.grey,
+                Text(
+                  prix ?? 'Indisponible',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: disponible ? Colors.black87 : Colors.grey,
+                  ),
                 ),
-              ),
               ],
             ),
           );
@@ -80,4 +90,3 @@ Widget buildPrixCarburants() {
     ),
   );
 }
-
