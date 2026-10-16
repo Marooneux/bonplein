@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
-import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -32,8 +31,8 @@ class _HomePageState extends State<HomePage> {
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: (index) => setState(() => _selectedIndex = index),
-        selectedItemColor: AppColors.economie,
-        unselectedItemColor: AppColors.slate500,
+        selectedItemColor: AppColors.vert,
+        unselectedItemColor: AppColors.neutral500,
         selectedLabelStyle: AppTextStyle.navLabel,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.map_outlined), label: 'Carte'),
