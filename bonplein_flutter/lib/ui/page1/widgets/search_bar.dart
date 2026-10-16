@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bonplein_flutter/ui/page1/stations_proches_page.dart';
 import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +31,11 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     _controller.text = suggestion.label;
     FocusManager.instance.primaryFocus?.unfocus();
     unawaited(widget.viewModel.selectSuggestion(suggestion));
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => StationsProchesPage(viewModel: widget.viewModel),
+      ),
+    );
   }
 
   @override

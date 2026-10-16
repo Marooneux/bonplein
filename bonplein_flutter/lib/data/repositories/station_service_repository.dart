@@ -22,12 +22,14 @@ class StationServiceRepository {
   /// Recherche les stations situées dans un rayon (en km) autour des
   /// coordonnées GPS fournies. Si un [carburant] est spécifié, seules les
   /// stations proposant ce carburant sont retournées, les résultats sont triés
-  /// par prix croissant.
+  /// par prix croissant, sauf si [triParPrix] vaut false : elles sont alors
+  /// triées de la plus proche à la plus éloignée.
   Future<List<Station>> getStationsProches({
     required double latitude,
     required double longitude,
     double rayonKm = 25.0,
     TypeCarburant? carburant,
+    bool triParPrix = true,
     int limit = 20,
     int offset = 0,
   }) async {
@@ -39,7 +41,7 @@ class StationServiceRepository {
       conditions.add('${carburant.champApi} is not null');
     }
 
-    final orderBy = carburant != null
+    final orderBy = carburant != null && triParPrix
         ? '${carburant.champApi} asc'
         : "distance(geom, geom'POINT($longitude $latitude)') asc";
 

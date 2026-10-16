@@ -262,6 +262,8 @@ class Page1ViewModel extends ChangeNotifier {
         latitude: position.latitude,
         longitude: position.longitude,
         carburant: _carburant,
+        // On veut les stations les plus proches, pas les moins chères.
+        triParPrix: false,
       );
       if (requestId != _requestId) return;
       _applyResult(result);
