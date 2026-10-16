@@ -1,13 +1,8 @@
-
-import 'package:bonplein_flutter/ui/pageInfoStation/view_models/page_info_station_view_model.dart';
+import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:flutter/material.dart';
 import 'widgets/widget_prix_carburants.dart';
 import 'widgets/widget_nom_station.dart';
 import 'widgets/widget_distance_trajet.dart';
-import '../page1/widgets/searchBar.dart';
-import '../core/widgets/widget_filtres_carburant.dart';
-import 'package:bonplein_flutter/domain/models/station_service.dart';
-import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 
 // ============================================================
 // PAGE : Informations détaillées d'une station
@@ -26,34 +21,26 @@ import 'package:bonplein_flutter/data/repositories/station_service_repository.da
 // sélectionnée, des carburants disponibles et de l'adresse du client.
 // ============================================================
 
-
-
 class PageInfoStation extends StatefulWidget {
 
-  //station test
   final Station station;
+  final double? distanceKm;
+  final int? tempsMin;
 
   const PageInfoStation({
     super.key,
     required this.station,
+    this.distanceKm,
+    this.tempsMin,
   });
 
   @override
   State<PageInfoStation> createState() => _PageInfoStationState();
+
 }
 
+class _PageInfoStationState extends State<PageInfoStation>{
 
-class _PageInfoStationState extends State<PageInfoStation> {
-  late final InfoStationViewModel viewModel;
-
-  @override
-  void initState() {
-    super.initState();
-
-    viewModel = InfoStationViewModel(
-      station: widget.station,
-    );
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -108,11 +95,11 @@ class _PageInfoStationState extends State<PageInfoStation> {
         const SizedBox(height: 24),
 
         // Section 2 : Distance et temps de trajet
-        buildDistanceTrajet(),
+        buildDistanceTrajet(widget.distanceKm, widget.tempsMin),
         const SizedBox(height: 24),
 
         // Section 3 : Prix des carburants
-        buildPrixCarburants(widget.station)
+        buildPrixCarburants(widget.station.carburants)
       ],
     ),
   );
@@ -144,7 +131,7 @@ class _PageInfoStationState extends State<PageInfoStation> {
               const SizedBox(height: 24),
 
               // Distance et temps de trajet en voiture.
-              buildDistanceTrajet(),
+              buildDistanceTrajet(widget.distanceKm, widget.tempsMin),
             ],
           ),
         ),
@@ -156,7 +143,7 @@ class _PageInfoStationState extends State<PageInfoStation> {
         Expanded(
           flex: 2,
           child: SingleChildScrollView(
-            child: buildPrixCarburants(widget.station),
+            child: buildPrixCarburants(widget.station.carburants),
           ),
         ),
       ],

@@ -1,13 +1,13 @@
-
-import 'package:flutter/material.dart';
 import 'package:bonplein_flutter/domain/models/station_service.dart';
+import 'package:flutter/material.dart';
 
-// Affiche le nom et l'adresse de la station sélectionnée.
 Widget buildNomParking(Station station) => Container(
   padding: const EdgeInsets.all(16),
+  decoration: BoxDecoration(
+  ),
   child: Row(
     children: [
-      // Logo à gauche.
+      // Logo à gauche
       Container(
         width: 64,
         height: 64,
@@ -24,7 +24,7 @@ Widget buildNomParking(Station station) => Container(
 
       const SizedBox(width: 16),
 
-      // Nom et adresse à droite.
+      // Nom et adresse à droite
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
