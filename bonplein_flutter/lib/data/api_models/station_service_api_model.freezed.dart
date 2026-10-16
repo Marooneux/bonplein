@@ -3,7 +3,7 @@
 // ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
-part of 'carburant_api_model.dart';
+part of 'station_service_api_model.dart';
 
 // **************************************************************************
 // FreezedGenerator
@@ -29,16 +29,21 @@ $ReponseStationsCopyWith<ReponseStations> get copyWith => _$ReponseStationsCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReponseStations&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&const DeepCollectionEquality().equals(other.results, results));
+  final _this = this as ReponseStations;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReponseStations&&(identical(other.totalCount, _this.totalCount) || other.totalCount == _this.totalCount)&&const DeepCollectionEquality().equals(other.results, _this.results));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,totalCount,const DeepCollectionEquality().hash(results));
+int get hashCode {
+  final _this = this as ReponseStations;
+  return Object.hash(runtimeType,_this.totalCount,const DeepCollectionEquality().hash(_this.results));
+}
 
 @override
 String toString() {
-  return 'ReponseStations(totalCount: $totalCount, results: $results)';
+  final _this = this as ReponseStations;
+  return 'ReponseStations(totalCount: ${_this.totalCount}, results: ${_this.results})';
 }
 
 
@@ -236,16 +241,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReponseStations&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&const DeepCollectionEquality().equals(other._results, _results));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReponseStations&&(identical(other.totalCount, totalCount) || other.totalCount == totalCount)&&const DeepCollectionEquality().equals(other.results, _results));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,totalCount,const DeepCollectionEquality().hash(_results));
+int get hashCode {
+    return Object.hash(runtimeType,totalCount,const DeepCollectionEquality().hash(_results));
+}
 
 @override
 String toString() {
-  return 'ReponseStations(totalCount: $totalCount, results: $results)';
+    return 'ReponseStations(totalCount: $totalCount, results: $results)';
 }
 
 
@@ -301,16 +308,21 @@ $PointGeoCopyWith<PointGeo> get copyWith => _$PointGeoCopyWithImpl<PointGeo>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PointGeo&&(identical(other.lon, lon) || other.lon == lon)&&(identical(other.lat, lat) || other.lat == lat));
+  final _this = this as PointGeo;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PointGeo&&(identical(other.lon, _this.lon) || other.lon == _this.lon)&&(identical(other.lat, _this.lat) || other.lat == _this.lat));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lon,lat);
+int get hashCode {
+  final _this = this as PointGeo;
+  return Object.hash(runtimeType,_this.lon,_this.lat);
+}
 
 @override
 String toString() {
-  return 'PointGeo(lon: $lon, lat: $lat)';
+  final _this = this as PointGeo;
+  return 'PointGeo(lon: ${_this.lon}, lat: ${_this.lat})';
 }
 
 
@@ -502,16 +514,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PointGeo&&(identical(other.lon, lon) || other.lon == lon)&&(identical(other.lat, lat) || other.lat == lat));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PointGeo&&(identical(other.lon, lon) || other.lon == lon)&&(identical(other.lat, lat) || other.lat == lat));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,lon,lat);
+int get hashCode {
+    return Object.hash(runtimeType,lon,lat);
+}
 
 @override
 String toString() {
-  return 'PointGeo(lon: $lon, lat: $lat)';
+    return 'PointGeo(lon: $lon, lat: $lat)';
 }
 
 
@@ -567,16 +581,21 @@ $StationServiceCopyWith<StationService> get copyWith => _$StationServiceCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StationService&&(identical(other.id, id) || other.id == id)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cp, cp) || other.cp == cp)&&(identical(other.pop, pop) || other.pop == pop)&&(identical(other.adresse, adresse) || other.adresse == adresse)&&(identical(other.ville, ville) || other.ville == ville)&&(identical(other.geom, geom) || other.geom == geom)&&(identical(other.gazolePrix, gazolePrix) || other.gazolePrix == gazolePrix)&&(identical(other.gazoleMaj, gazoleMaj) || other.gazoleMaj == gazoleMaj)&&(identical(other.sp95Prix, sp95Prix) || other.sp95Prix == sp95Prix)&&(identical(other.sp95Maj, sp95Maj) || other.sp95Maj == sp95Maj)&&(identical(other.e85Prix, e85Prix) || other.e85Prix == e85Prix)&&(identical(other.e85Maj, e85Maj) || other.e85Maj == e85Maj)&&(identical(other.gplcPrix, gplcPrix) || other.gplcPrix == gplcPrix)&&(identical(other.gplcMaj, gplcMaj) || other.gplcMaj == gplcMaj)&&(identical(other.e10Prix, e10Prix) || other.e10Prix == e10Prix)&&(identical(other.e10Maj, e10Maj) || other.e10Maj == e10Maj)&&(identical(other.sp98Prix, sp98Prix) || other.sp98Prix == sp98Prix)&&(identical(other.sp98Maj, sp98Maj) || other.sp98Maj == sp98Maj)&&const DeepCollectionEquality().equals(other.carburantsDisponibles, carburantsDisponibles)&&const DeepCollectionEquality().equals(other.carburantsIndisponibles, carburantsIndisponibles)&&(identical(other.carburantsRuptureTemporaire, carburantsRuptureTemporaire) || other.carburantsRuptureTemporaire == carburantsRuptureTemporaire)&&(identical(other.carburantsRuptureDefinitive, carburantsRuptureDefinitive) || other.carburantsRuptureDefinitive == carburantsRuptureDefinitive)&&(identical(other.horairesAutomate2424, horairesAutomate2424) || other.horairesAutomate2424 == horairesAutomate2424)&&const DeepCollectionEquality().equals(other.servicesService, servicesService)&&(identical(other.departement, departement) || other.departement == departement)&&(identical(other.codeDepartement, codeDepartement) || other.codeDepartement == codeDepartement)&&(identical(other.region, region) || other.region == region)&&(identical(other.codeRegion, codeRegion) || other.codeRegion == codeRegion));
+  final _this = this as StationService;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StationService&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.latitude, _this.latitude) || other.latitude == _this.latitude)&&(identical(other.longitude, _this.longitude) || other.longitude == _this.longitude)&&(identical(other.cp, _this.cp) || other.cp == _this.cp)&&(identical(other.pop, _this.pop) || other.pop == _this.pop)&&(identical(other.adresse, _this.adresse) || other.adresse == _this.adresse)&&(identical(other.ville, _this.ville) || other.ville == _this.ville)&&(identical(other.geom, _this.geom) || other.geom == _this.geom)&&(identical(other.gazolePrix, _this.gazolePrix) || other.gazolePrix == _this.gazolePrix)&&(identical(other.gazoleMaj, _this.gazoleMaj) || other.gazoleMaj == _this.gazoleMaj)&&(identical(other.sp95Prix, _this.sp95Prix) || other.sp95Prix == _this.sp95Prix)&&(identical(other.sp95Maj, _this.sp95Maj) || other.sp95Maj == _this.sp95Maj)&&(identical(other.e85Prix, _this.e85Prix) || other.e85Prix == _this.e85Prix)&&(identical(other.e85Maj, _this.e85Maj) || other.e85Maj == _this.e85Maj)&&(identical(other.gplcPrix, _this.gplcPrix) || other.gplcPrix == _this.gplcPrix)&&(identical(other.gplcMaj, _this.gplcMaj) || other.gplcMaj == _this.gplcMaj)&&(identical(other.e10Prix, _this.e10Prix) || other.e10Prix == _this.e10Prix)&&(identical(other.e10Maj, _this.e10Maj) || other.e10Maj == _this.e10Maj)&&(identical(other.sp98Prix, _this.sp98Prix) || other.sp98Prix == _this.sp98Prix)&&(identical(other.sp98Maj, _this.sp98Maj) || other.sp98Maj == _this.sp98Maj)&&const DeepCollectionEquality().equals(other.carburantsDisponibles, _this.carburantsDisponibles)&&const DeepCollectionEquality().equals(other.carburantsIndisponibles, _this.carburantsIndisponibles)&&(identical(other.carburantsRuptureTemporaire, _this.carburantsRuptureTemporaire) || other.carburantsRuptureTemporaire == _this.carburantsRuptureTemporaire)&&(identical(other.carburantsRuptureDefinitive, _this.carburantsRuptureDefinitive) || other.carburantsRuptureDefinitive == _this.carburantsRuptureDefinitive)&&(identical(other.horairesAutomate2424, _this.horairesAutomate2424) || other.horairesAutomate2424 == _this.horairesAutomate2424)&&const DeepCollectionEquality().equals(other.servicesService, _this.servicesService)&&(identical(other.departement, _this.departement) || other.departement == _this.departement)&&(identical(other.codeDepartement, _this.codeDepartement) || other.codeDepartement == _this.codeDepartement)&&(identical(other.region, _this.region) || other.region == _this.region)&&(identical(other.codeRegion, _this.codeRegion) || other.codeRegion == _this.codeRegion));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,latitude,longitude,cp,pop,adresse,ville,geom,gazolePrix,gazoleMaj,sp95Prix,sp95Maj,e85Prix,e85Maj,gplcPrix,gplcMaj,e10Prix,e10Maj,sp98Prix,sp98Maj,const DeepCollectionEquality().hash(carburantsDisponibles),const DeepCollectionEquality().hash(carburantsIndisponibles),carburantsRuptureTemporaire,carburantsRuptureDefinitive,horairesAutomate2424,const DeepCollectionEquality().hash(servicesService),departement,codeDepartement,region,codeRegion]);
+int get hashCode {
+  final _this = this as StationService;
+  return Object.hashAll([runtimeType,_this.id,_this.latitude,_this.longitude,_this.cp,_this.pop,_this.adresse,_this.ville,_this.geom,_this.gazolePrix,_this.gazoleMaj,_this.sp95Prix,_this.sp95Maj,_this.e85Prix,_this.e85Maj,_this.gplcPrix,_this.gplcMaj,_this.e10Prix,_this.e10Maj,_this.sp98Prix,_this.sp98Maj,const DeepCollectionEquality().hash(_this.carburantsDisponibles),const DeepCollectionEquality().hash(_this.carburantsIndisponibles),_this.carburantsRuptureTemporaire,_this.carburantsRuptureDefinitive,_this.horairesAutomate2424,const DeepCollectionEquality().hash(_this.servicesService),_this.departement,_this.codeDepartement,_this.region,_this.codeRegion]);
+}
 
 @override
 String toString() {
-  return 'StationService(id: $id, latitude: $latitude, longitude: $longitude, cp: $cp, pop: $pop, adresse: $adresse, ville: $ville, geom: $geom, gazolePrix: $gazolePrix, gazoleMaj: $gazoleMaj, sp95Prix: $sp95Prix, sp95Maj: $sp95Maj, e85Prix: $e85Prix, e85Maj: $e85Maj, gplcPrix: $gplcPrix, gplcMaj: $gplcMaj, e10Prix: $e10Prix, e10Maj: $e10Maj, sp98Prix: $sp98Prix, sp98Maj: $sp98Maj, carburantsDisponibles: $carburantsDisponibles, carburantsIndisponibles: $carburantsIndisponibles, carburantsRuptureTemporaire: $carburantsRuptureTemporaire, carburantsRuptureDefinitive: $carburantsRuptureDefinitive, horairesAutomate2424: $horairesAutomate2424, servicesService: $servicesService, departement: $departement, codeDepartement: $codeDepartement, region: $region, codeRegion: $codeRegion)';
+  final _this = this as StationService;
+  return 'StationService(id: ${_this.id}, latitude: ${_this.latitude}, longitude: ${_this.longitude}, cp: ${_this.cp}, pop: ${_this.pop}, adresse: ${_this.adresse}, ville: ${_this.ville}, geom: ${_this.geom}, gazolePrix: ${_this.gazolePrix}, gazoleMaj: ${_this.gazoleMaj}, sp95Prix: ${_this.sp95Prix}, sp95Maj: ${_this.sp95Maj}, e85Prix: ${_this.e85Prix}, e85Maj: ${_this.e85Maj}, gplcPrix: ${_this.gplcPrix}, gplcMaj: ${_this.gplcMaj}, e10Prix: ${_this.e10Prix}, e10Maj: ${_this.e10Maj}, sp98Prix: ${_this.sp98Prix}, sp98Maj: ${_this.sp98Maj}, carburantsDisponibles: ${_this.carburantsDisponibles}, carburantsIndisponibles: ${_this.carburantsIndisponibles}, carburantsRuptureTemporaire: ${_this.carburantsRuptureTemporaire}, carburantsRuptureDefinitive: ${_this.carburantsRuptureDefinitive}, horairesAutomate2424: ${_this.horairesAutomate2424}, servicesService: ${_this.servicesService}, departement: ${_this.departement}, codeDepartement: ${_this.codeDepartement}, region: ${_this.region}, codeRegion: ${_this.codeRegion})';
 }
 
 
@@ -860,16 +879,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StationService&&(identical(other.id, id) || other.id == id)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cp, cp) || other.cp == cp)&&(identical(other.pop, pop) || other.pop == pop)&&(identical(other.adresse, adresse) || other.adresse == adresse)&&(identical(other.ville, ville) || other.ville == ville)&&(identical(other.geom, geom) || other.geom == geom)&&(identical(other.gazolePrix, gazolePrix) || other.gazolePrix == gazolePrix)&&(identical(other.gazoleMaj, gazoleMaj) || other.gazoleMaj == gazoleMaj)&&(identical(other.sp95Prix, sp95Prix) || other.sp95Prix == sp95Prix)&&(identical(other.sp95Maj, sp95Maj) || other.sp95Maj == sp95Maj)&&(identical(other.e85Prix, e85Prix) || other.e85Prix == e85Prix)&&(identical(other.e85Maj, e85Maj) || other.e85Maj == e85Maj)&&(identical(other.gplcPrix, gplcPrix) || other.gplcPrix == gplcPrix)&&(identical(other.gplcMaj, gplcMaj) || other.gplcMaj == gplcMaj)&&(identical(other.e10Prix, e10Prix) || other.e10Prix == e10Prix)&&(identical(other.e10Maj, e10Maj) || other.e10Maj == e10Maj)&&(identical(other.sp98Prix, sp98Prix) || other.sp98Prix == sp98Prix)&&(identical(other.sp98Maj, sp98Maj) || other.sp98Maj == sp98Maj)&&const DeepCollectionEquality().equals(other._carburantsDisponibles, _carburantsDisponibles)&&const DeepCollectionEquality().equals(other._carburantsIndisponibles, _carburantsIndisponibles)&&(identical(other.carburantsRuptureTemporaire, carburantsRuptureTemporaire) || other.carburantsRuptureTemporaire == carburantsRuptureTemporaire)&&(identical(other.carburantsRuptureDefinitive, carburantsRuptureDefinitive) || other.carburantsRuptureDefinitive == carburantsRuptureDefinitive)&&(identical(other.horairesAutomate2424, horairesAutomate2424) || other.horairesAutomate2424 == horairesAutomate2424)&&const DeepCollectionEquality().equals(other._servicesService, _servicesService)&&(identical(other.departement, departement) || other.departement == departement)&&(identical(other.codeDepartement, codeDepartement) || other.codeDepartement == codeDepartement)&&(identical(other.region, region) || other.region == region)&&(identical(other.codeRegion, codeRegion) || other.codeRegion == codeRegion));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StationService&&(identical(other.id, id) || other.id == id)&&(identical(other.latitude, latitude) || other.latitude == latitude)&&(identical(other.longitude, longitude) || other.longitude == longitude)&&(identical(other.cp, cp) || other.cp == cp)&&(identical(other.pop, pop) || other.pop == pop)&&(identical(other.adresse, adresse) || other.adresse == adresse)&&(identical(other.ville, ville) || other.ville == ville)&&(identical(other.geom, geom) || other.geom == geom)&&(identical(other.gazolePrix, gazolePrix) || other.gazolePrix == gazolePrix)&&(identical(other.gazoleMaj, gazoleMaj) || other.gazoleMaj == gazoleMaj)&&(identical(other.sp95Prix, sp95Prix) || other.sp95Prix == sp95Prix)&&(identical(other.sp95Maj, sp95Maj) || other.sp95Maj == sp95Maj)&&(identical(other.e85Prix, e85Prix) || other.e85Prix == e85Prix)&&(identical(other.e85Maj, e85Maj) || other.e85Maj == e85Maj)&&(identical(other.gplcPrix, gplcPrix) || other.gplcPrix == gplcPrix)&&(identical(other.gplcMaj, gplcMaj) || other.gplcMaj == gplcMaj)&&(identical(other.e10Prix, e10Prix) || other.e10Prix == e10Prix)&&(identical(other.e10Maj, e10Maj) || other.e10Maj == e10Maj)&&(identical(other.sp98Prix, sp98Prix) || other.sp98Prix == sp98Prix)&&(identical(other.sp98Maj, sp98Maj) || other.sp98Maj == sp98Maj)&&const DeepCollectionEquality().equals(other.carburantsDisponibles, _carburantsDisponibles)&&const DeepCollectionEquality().equals(other.carburantsIndisponibles, _carburantsIndisponibles)&&(identical(other.carburantsRuptureTemporaire, carburantsRuptureTemporaire) || other.carburantsRuptureTemporaire == carburantsRuptureTemporaire)&&(identical(other.carburantsRuptureDefinitive, carburantsRuptureDefinitive) || other.carburantsRuptureDefinitive == carburantsRuptureDefinitive)&&(identical(other.horairesAutomate2424, horairesAutomate2424) || other.horairesAutomate2424 == horairesAutomate2424)&&const DeepCollectionEquality().equals(other.servicesService, _servicesService)&&(identical(other.departement, departement) || other.departement == departement)&&(identical(other.codeDepartement, codeDepartement) || other.codeDepartement == codeDepartement)&&(identical(other.region, region) || other.region == region)&&(identical(other.codeRegion, codeRegion) || other.codeRegion == codeRegion));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,latitude,longitude,cp,pop,adresse,ville,geom,gazolePrix,gazoleMaj,sp95Prix,sp95Maj,e85Prix,e85Maj,gplcPrix,gplcMaj,e10Prix,e10Maj,sp98Prix,sp98Maj,const DeepCollectionEquality().hash(_carburantsDisponibles),const DeepCollectionEquality().hash(_carburantsIndisponibles),carburantsRuptureTemporaire,carburantsRuptureDefinitive,horairesAutomate2424,const DeepCollectionEquality().hash(_servicesService),departement,codeDepartement,region,codeRegion]);
+int get hashCode {
+    return Object.hashAll([runtimeType,id,latitude,longitude,cp,pop,adresse,ville,geom,gazolePrix,gazoleMaj,sp95Prix,sp95Maj,e85Prix,e85Maj,gplcPrix,gplcMaj,e10Prix,e10Maj,sp98Prix,sp98Maj,const DeepCollectionEquality().hash(_carburantsDisponibles),const DeepCollectionEquality().hash(_carburantsIndisponibles),carburantsRuptureTemporaire,carburantsRuptureDefinitive,horairesAutomate2424,const DeepCollectionEquality().hash(_servicesService),departement,codeDepartement,region,codeRegion]);
+}
 
 @override
 String toString() {
-  return 'StationService(id: $id, latitude: $latitude, longitude: $longitude, cp: $cp, pop: $pop, adresse: $adresse, ville: $ville, geom: $geom, gazolePrix: $gazolePrix, gazoleMaj: $gazoleMaj, sp95Prix: $sp95Prix, sp95Maj: $sp95Maj, e85Prix: $e85Prix, e85Maj: $e85Maj, gplcPrix: $gplcPrix, gplcMaj: $gplcMaj, e10Prix: $e10Prix, e10Maj: $e10Maj, sp98Prix: $sp98Prix, sp98Maj: $sp98Maj, carburantsDisponibles: $carburantsDisponibles, carburantsIndisponibles: $carburantsIndisponibles, carburantsRuptureTemporaire: $carburantsRuptureTemporaire, carburantsRuptureDefinitive: $carburantsRuptureDefinitive, horairesAutomate2424: $horairesAutomate2424, servicesService: $servicesService, departement: $departement, codeDepartement: $codeDepartement, region: $region, codeRegion: $codeRegion)';
+    return 'StationService(id: $id, latitude: $latitude, longitude: $longitude, cp: $cp, pop: $pop, adresse: $adresse, ville: $ville, geom: $geom, gazolePrix: $gazolePrix, gazoleMaj: $gazoleMaj, sp95Prix: $sp95Prix, sp95Maj: $sp95Maj, e85Prix: $e85Prix, e85Maj: $e85Maj, gplcPrix: $gplcPrix, gplcMaj: $gplcMaj, e10Prix: $e10Prix, e10Maj: $e10Maj, sp98Prix: $sp98Prix, sp98Maj: $sp98Maj, carburantsDisponibles: $carburantsDisponibles, carburantsIndisponibles: $carburantsIndisponibles, carburantsRuptureTemporaire: $carburantsRuptureTemporaire, carburantsRuptureDefinitive: $carburantsRuptureDefinitive, horairesAutomate2424: $horairesAutomate2424, servicesService: $servicesService, departement: $departement, codeDepartement: $codeDepartement, region: $region, codeRegion: $codeRegion)';
 }
 
 
