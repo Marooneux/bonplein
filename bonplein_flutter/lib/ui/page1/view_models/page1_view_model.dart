@@ -49,6 +49,7 @@ class Page1ViewModel extends ChangeNotifier {
   String? _errorMessage;
   int _requestId = 0;
   bool _disposed = false;
+  bool _triParPrix = false;
 
   List<AddressSuggestion> _suggestions = [];
   Coordonnees? _userPosition;
@@ -63,6 +64,7 @@ class Page1ViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasLocation => _position != null;
+  bool get triParPrix => _triParPrix;
   List<AddressSuggestion> get suggestions => _suggestions;
 
   double? prixDe(Station station) {
@@ -229,6 +231,13 @@ class Page1ViewModel extends ChangeNotifier {
     );
   }
 
+  /// Tri de la liste : les plus proches (false) ou les moins chères (true).
+  Future<void> setTriParPrix({required bool triParPrix}) async {
+    if (_triParPrix == triParPrix) return;
+    _triParPrix = triParPrix;
+    await loadStations();
+  }
+
   /// Bouton de carburant (SP95, SP98, Gazole, E85, GPL).
   Future<void> selectFuel(String bouton) async {
     final carburant = _carburantDepuisBouton(bouton);
@@ -262,8 +271,7 @@ class Page1ViewModel extends ChangeNotifier {
         latitude: position.latitude,
         longitude: position.longitude,
         carburant: _carburant,
-        // On veut les stations les plus proches, pas les moins chères.
-        triParPrix: false,
+        triParPrix: _triParPrix,
       );
       if (requestId != _requestId) return;
       _applyResult(result);
