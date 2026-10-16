@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 class StationCard extends StatelessWidget {
 
   const StationCard({
-    required this.nom, required this.adresse, required this.prix, required this.distance, required this.temps, super.key,
+    required this.ville, required this.adresse, required this.prix, required this.distance, required this.temps, super.key,
   });
-  final String nom;
+  final String ville;
   final String adresse;
   final double prix;
   final double distance;
@@ -19,7 +19,7 @@ class StationCard extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         child: Row(
           children: [
             Expanded(
@@ -27,14 +27,14 @@ class StationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    nom,
+                    adresse,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyle.titreCarte,
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    adresse,
+                    ville,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: AppTextStyle.texteSecondaire,

@@ -36,7 +36,7 @@ class StationServiceRepository {
     ];
 
     if (carburant != null) {
-      conditions.add('is_defined(${carburant.champApi})');
+      conditions.add('${carburant.champApi} is not null');
     }
 
     final orderBy = carburant != null
@@ -63,7 +63,7 @@ class StationServiceRepository {
     final conditions = <String>['code_departement = "$codeDepartement"'];
 
     if (carburant != null) {
-      conditions.add('is_defined(${carburant.champApi})');
+      conditions.add('${carburant.champApi} is not null');
     }
 
     final reponse = await _api.getRecords(
@@ -86,7 +86,7 @@ class StationServiceRepository {
     final conditions = <String>['search(ville, "$ville")'];
 
     if (carburant != null) {
-      conditions.add('is_defined(${carburant.champApi})');
+      conditions.add('${carburant.champApi} is not null');
     }
 
     final reponse = await _api.getRecords(
