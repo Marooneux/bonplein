@@ -1,15 +1,15 @@
-import 'package:bonplein_flutter/data/api_models/carburant_api_model.dart';
-import 'package:bonplein_flutter/data/services/api/carburant_api_service.dart';
+import 'package:bonplein_flutter/data/api_models/station_service_api_model.dart';
+import 'package:bonplein_flutter/data/services/api/station_service_api_service.dart';
 import 'package:bonplein_flutter/domain/models/carburant.dart';
 import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:bonplein_flutter/domain/models/type_carburant.dart';
 import 'package:dio/dio.dart';
 
 class StationServiceRepository {
-  StationServiceRepository({CarburantsApi? api})
+  StationServiceRepository({StationServiceApi? api})
     : _api =
           api ??
-          CarburantsApi(
+          StationServiceApi(
             Dio(
               BaseOptions(
                 connectTimeout: const Duration(seconds: 10),
@@ -17,7 +17,7 @@ class StationServiceRepository {
               ),
             ),
           );
-  final CarburantsApi _api;
+  final StationServiceApi _api;
 
   /// Recherche les stations situées dans un rayon (en km) autour des
   /// coordonnées GPS fournies. Si un [carburant] est spécifié, seules les
