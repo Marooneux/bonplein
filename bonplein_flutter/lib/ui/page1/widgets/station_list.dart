@@ -4,7 +4,7 @@ import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
 import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
 import 'package:bonplein_flutter/ui/page1/widgets/station_card.dart';
-import 'package:bonplein_flutter/ui/page_info_station/page_info_station.dart';
+import 'package:bonplein_flutter/ui/pageInfoStation/page_info_station.dart';
 import 'package:flutter/material.dart';
 
 class StationList extends StatelessWidget {
@@ -61,7 +61,7 @@ class StationList extends StatelessWidget {
           temps: viewModel.tempsTrajetMin(s)!,
           onTap: () => Navigator.push(
             context,
-            MaterialPageRoute(
+            MaterialPageRoute<void>(
               builder: (_) => PageInfoStation(
                 station: s,
                 distanceKm: viewModel.distanceKm(s),

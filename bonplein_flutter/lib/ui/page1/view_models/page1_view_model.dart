@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math' show max, min;
+import 'dart:math' show ln10, log, max, min;
 
 import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 import 'package:bonplein_flutter/domain/models/station_service.dart';
@@ -7,6 +7,7 @@ import 'package:bonplein_flutter/domain/models/type_carburant.dart';
 import 'package:bonplein_flutter/utils/math_utils.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 
 typedef Coordonnees = ({double latitude, double longitude});
 typedef AddressSuggestion = ({String label, double latitude, double longitude});
@@ -48,8 +49,10 @@ class Page1ViewModel extends ChangeNotifier {
   String? _errorMessage;
   int _requestId = 0;
   bool _disposed = false;
+  bool _triParPrix = false;
 
   List<AddressSuggestion> _suggestions = [];
+  Coordonnees? _userPosition;
   Timer? _debounce;
   int _addressRequestId = 0;
 
@@ -61,6 +64,7 @@ class Page1ViewModel extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
   bool get hasLocation => _position != null;
+  bool get triParPrix => _triParPrix;
   List<AddressSuggestion> get suggestions => _suggestions;
 
   double? prixDe(Station station) {
@@ -106,6 +110,25 @@ class Page1ViewModel extends ChangeNotifier {
     return loadStations();
   }
 
+  /// Récupère la position GPS de l'utilisateur, pour proposer en premier
+  /// les adresses proches de lui. Sans permission, on ne fait rien.
+  Future<void> loadUserPosition() async {
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+      final p = await Geolocator.getCurrentPosition();
+      _userPosition = (latitude: p.latitude, longitude: p.longitude);
+    } on Exception {
+      // GPS désactivé : la recherche marche quand même, sans priorité.
+    }
+  }
+
   /// Appelée à chaque lettre tapée dans la barre de recherche.
   void searchAddress(String text) {
     _debounce?.cancel();
@@ -132,19 +155,71 @@ class Page1ViewModel extends ChangeNotifier {
   }
 
   Future<List<AddressSuggestion>> _fetchAddresses(String query) async {
+    final position = _userPosition;
     final response = await _dio.get<Map<String, dynamic>>(
       'https://data.geopf.fr/geocodage/search',
-      queryParameters: {'q': query, 'limit': 5},
+      queryParameters: {
+        'q': query,
+        // On en demande plus pour pouvoir retrier selon la distance
+        'limit': position == null ? 5 : 20,
+        if (position != null) ...{
+          'lat': position.latitude,
+          'lon': position.longitude,
+        },
+      },
     );
     final features = (response.data?['features'] as List<dynamic>?) ?? [];
-    return [
-      for (final f in features)
-        (
-        label: f['properties']['label'] as String,
-        longitude: (f['geometry']['coordinates'][0] as num).toDouble(),
-        latitude: (f['geometry']['coordinates'][1] as num).toDouble(),
-        ),
+    final results = [
+      for (final f in features.cast<Map<String, dynamic>>())
+        _parseFeature(f),
     ];
+    if (position == null) return [for (final r in results) r.suggestion];
+
+    // L'API trie surtout sur le texte : on enlève un peu de score aux
+    // adresses lointaines, sans que la distance écrase la pertinence
+    double rang(({AddressSuggestion suggestion, double score}) r) {
+      final km = calculerDistanceKm(
+        lat1: position.latitude,
+        lon1: position.longitude,
+        lat2: r.suggestion.latitude,
+        lon2: r.suggestion.longitude,
+      );
+      return r.score - 0.05 * log(1 + km) / ln10;
+    }
+
+    results.sort((a, b) => rang(b).compareTo(rang(a)));
+    return [for (final r in results.take(5)) r.suggestion];
+  }
+
+  ({AddressSuggestion suggestion, double score}) _parseFeature(
+    Map<String, dynamic> f,
+  ) {
+    final properties = f['properties'] as Map<String, dynamic>;
+    final geometry = f['geometry'] as Map<String, dynamic>;
+    final coordinates = geometry['coordinates'] as List<dynamic>;
+    return (
+      suggestion: (
+        label: _formatLabel(properties),
+        longitude: (coordinates[0] as num).toDouble(),
+        latitude: (coordinates[1] as num).toDouble(),
+      ),
+      score: (properties['score'] as num?)?.toDouble() ?? 0,
+    );
+  }
+
+
+  /// "8 Boulevard du Port, 80000, Amiens" au lieu de
+  /// "8 Boulevard du Port 80000 Amiens".
+  String _formatLabel(Map<String, dynamic> properties) {
+    final name = properties['name'] as String?;
+    final postcode = properties['postcode'] as String?;
+    final city = properties['city'] as String?;
+    // Un Set pour éviter "Amiens, 80000, Amiens" quand on cherche une ville.
+    final parts = <String?>{name, postcode, city}
+        .whereType<String>()
+        .where((p) => p.isNotEmpty);
+    if (parts.isEmpty) return properties['label'] as String? ?? '';
+    return parts.join(', ');
   }
 
   /// L'utilisateur choisit une adresse dans la liste.
@@ -154,6 +229,13 @@ class Page1ViewModel extends ChangeNotifier {
       s.label,
       (latitude: s.latitude, longitude: s.longitude),
     );
+  }
+
+  /// Tri de la liste : les plus proches (false) ou les moins chères (true).
+  Future<void> setTriParPrix({required bool triParPrix}) async {
+    if (_triParPrix == triParPrix) return;
+    _triParPrix = triParPrix;
+    await loadStations();
   }
 
   /// Bouton de carburant (SP95, SP98, Gazole, E85, GPL).
@@ -189,6 +271,7 @@ class Page1ViewModel extends ChangeNotifier {
         latitude: position.latitude,
         longitude: position.longitude,
         carburant: _carburant,
+        triParPrix: _triParPrix,
       );
       if (requestId != _requestId) return;
       _applyResult(result);
