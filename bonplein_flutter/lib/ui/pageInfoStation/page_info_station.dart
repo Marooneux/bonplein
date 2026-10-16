@@ -1,4 +1,5 @@
 
+import 'package:bonplein_flutter/ui/pageInfoStation/view_models/page_info_station_view_model.dart';
 import 'package:flutter/material.dart';
 import 'widgets/widget_prix_carburants.dart';
 import 'widgets/widget_nom_station.dart';
@@ -6,6 +7,7 @@ import 'widgets/widget_distance_trajet.dart';
 import '../page1/widgets/searchBar.dart';
 import '../core/widgets/widget_filtres_carburant.dart';
 import 'package:bonplein_flutter/domain/models/station_service.dart';
+import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 
 // ============================================================
 // PAGE : Informations détaillées d'une station
@@ -40,8 +42,18 @@ class PageInfoStation extends StatefulWidget {
   State<PageInfoStation> createState() => _PageInfoStationState();
 }
 
-class _PageInfoStationState extends State<PageInfoStation>{
 
+class _PageInfoStationState extends State<PageInfoStation> {
+  late final InfoStationViewModel viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+
+    viewModel = InfoStationViewModel(
+      station: widget.station,
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
