@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 class FuelFilterWidget extends StatefulWidget {
   final ValueChanged<String?>? onFuelSelected;
+  final String carburantInitial;
+  final bool afficherTous;
 
   const FuelFilterWidget({
     super.key,
     this.onFuelSelected,
+    this.carburantInitial = 'Tous',
+    this.afficherTous = true,
   });
 
   @override
@@ -13,8 +17,8 @@ class FuelFilterWidget extends StatefulWidget {
   }
 
   class _FuelFilterWidgetState extends State<FuelFilterWidget> {
-  final List<String> carburants = [
-    'Tous',
+  late final List<String> carburants = [
+    if (widget.afficherTous) 'Tous',
     'SP95',
     'SP95-E10',
     'SP98',
@@ -23,7 +27,7 @@ class FuelFilterWidget extends StatefulWidget {
     'GPL-c',
   ];
 
-  String carburantSelectionne = 'Tous';
+  late String carburantSelectionne = widget.carburantInitial;
 
   @override
   Widget build(BuildContext context) {
