@@ -140,11 +140,25 @@ class Page1ViewModel extends ChangeNotifier {
     return [
       for (final f in features)
         (
-        label: f['properties']['label'] as String,
+        label: _formatLabel(f['properties'] as Map<String, dynamic>),
         longitude: (f['geometry']['coordinates'][0] as num).toDouble(),
         latitude: (f['geometry']['coordinates'][1] as num).toDouble(),
         ),
     ];
+  }
+
+  /// "8 Boulevard du Port, 80000, Amiens" au lieu de
+  /// "8 Boulevard du Port 80000 Amiens".
+  String _formatLabel(Map<String, dynamic> properties) {
+    final name = properties['name'] as String?;
+    final postcode = properties['postcode'] as String?;
+    final city = properties['city'] as String?;
+    // Un Set pour éviter "Amiens, 80000, Amiens" quand on cherche une ville.
+    final parts = <String?>{name, postcode, city}
+        .whereType<String>()
+        .where((p) => p.isNotEmpty);
+    if (parts.isEmpty) return properties['label'] as String? ?? '';
+    return parts.join(', ');
   }
 
   /// L'utilisateur choisit une adresse dans la liste.
