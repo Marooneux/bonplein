@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'carburant_api_model.freezed.dart';
-part 'carburant_api_model.g.dart';
+part 'station_service_api_model.freezed.dart';
+part 'station_service_api_model.g.dart';
 
 @freezed
 abstract class ReponseStations with _$ReponseStations {
