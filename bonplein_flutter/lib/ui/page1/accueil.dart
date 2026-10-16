@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 import 'package:bonplein_flutter/ui/core/widgets/widget_filtres_carburant.dart';
@@ -16,6 +18,12 @@ class Accueil extends StatefulWidget {
 class _AccueilState extends State<Accueil> {
   late final Page1ViewModel _viewModel =
       Page1ViewModel(repository: StationServiceRepository());
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_viewModel.loadUserPosition());
+  }
 
   @override
   void dispose() {
