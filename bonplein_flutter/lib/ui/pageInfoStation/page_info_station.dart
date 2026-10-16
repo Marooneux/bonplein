@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'widgets/widget_prix_carburants.dart';
 import 'widgets/widget_nom_station.dart';
 import 'widgets/widget_distance_trajet.dart';
-
+import 'widgets/widget_maj_station.dart';
 // ============================================================
 // PAGE : Informations détaillées d'une station
 // ============================================================
@@ -94,6 +94,9 @@ class _PageInfoStationState extends State<PageInfoStation>{
         buildNomParking(widget.station),
         const SizedBox(height: 24),
 
+        buildMajStation(widget.station.carburants),
+        const SizedBox(height: 24),
+
         // Section 2 : Distance et temps de trajet
         buildDistanceTrajet(widget.distanceKm, widget.tempsMin),
         const SizedBox(height: 24),
@@ -127,6 +130,10 @@ class _PageInfoStationState extends State<PageInfoStation>{
             children: [
               // Nom et adresse
               buildNomParking(widget.station),
+
+              const SizedBox(height: 24),
+
+              buildMajStation(widget.station.carburants),
 
               const SizedBox(height: 24),
 
