@@ -27,15 +27,19 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     super.dispose();
   }
 
-  void _onSuggestionTap(AddressSuggestion suggestion) {
+  Future<void> _onSuggestionTap(AddressSuggestion suggestion) async {
     _controller.text = suggestion.label;
     FocusManager.instance.primaryFocus?.unfocus();
     unawaited(widget.viewModel.selectSuggestion(suggestion));
-    Navigator.of(context).push(
+    // Se termine quand on revient sur l'accueil (retour ou onglet Carte).
+    await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => StationsProchesPage(viewModel: widget.viewModel),
       ),
     );
+    if (!mounted) return;
+    _controller.clear();
+    widget.viewModel.searchAddress('');
   }
 
   @override
