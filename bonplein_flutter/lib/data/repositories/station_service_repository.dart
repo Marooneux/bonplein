@@ -23,18 +23,20 @@ class StationServiceRepository {
   /// coordonnées GPS fournies. Si un [carburant] est spécifié, seules les
   /// stations proposant ce carburant sont retournées, les résultats sont triés
   /// par prix croissant, sauf si [triParPrix] vaut false : elles sont alors
-  /// triées de la plus proche à la plus éloignée.
+  /// triées de la plus proche à la plus éloignée. Si [rayonKm] vaut null,
+  /// il n'y a pas de limite de distance.
   Future<List<Station>> getStationsProches({
     required double latitude,
     required double longitude,
-    double rayonKm = 25.0,
+    double? rayonKm = 25.0,
     TypeCarburant? carburant,
     bool triParPrix = true,
     int limit = 20,
     int offset = 0,
   }) async {
+    final point = "geom'POINT($longitude $latitude)'";
     final conditions = <String>[
-      "within_distance(geom, geom'POINT($longitude $latitude)', ${rayonKm}km)",
+      if (rayonKm != null) 'within_distance(geom, $point, ${rayonKm}km)',
     ];
 
     if (carburant != null) {
@@ -46,7 +48,7 @@ class StationServiceRepository {
         : "distance(geom, geom'POINT($longitude $latitude)') asc";
 
     final reponse = await _api.getRecords(
-      where: conditions.join(' and '),
+      where: conditions.isEmpty ? null : conditions.join(' and '),
       orderBy: orderBy,
       limit: limit,
       offset: offset,
