@@ -43,7 +43,7 @@ class _AccueilState extends State<Accueil> {
           ),
           const FuelFilterWidget(),
           const SizedBox(height: AppSpacing.xs),
-          const Expanded(child: MapWidget()),
+          Expanded(child: MapWidget(viewModel: _viewModel)),
         ],
       ),
     );

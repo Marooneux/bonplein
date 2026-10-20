@@ -126,7 +126,13 @@ class Page1ViewModel extends ChangeNotifier {
         return;
       }
       final p = await Geolocator.getCurrentPosition();
-      _userPosition = (latitude: p.latitude, longitude: p.longitude);
+      final userPosition = (latitude: p.latitude, longitude: p.longitude);
+      _userPosition = userPosition;
+      // Stations autour de l'utilisateur pour la carte de l'accueil, sauf
+      // s'il a déjà choisi une adresse pendant que le GPS cherchait.
+      if (_position == null) {
+        await selectLocation('Autour de moi', userPosition);
+      }
     } on Exception {
       // GPS désactivé : la recherche marche quand même, sans priorité.
     }
