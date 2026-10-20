@@ -278,24 +278,18 @@ class Page1ViewModel extends ChangeNotifier {
       );
       // Peu de stations autour : on prend les plus proches, même loin.
       if (result.length < stationsMinimum) {
-        result = await _repository.getStationsProches(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          rayonKm: null,
-          carburant: _carburant,
-          triParPrix: false,
-          limit: stationsMinimum,
-        );
-        if (_triParPrix) {
-          result.sort(
-            (a, b) => (prixDe(a) ?? double.infinity)
-                .compareTo(prixDe(b) ?? double.infinity),
-          );
+        try {
+          result = await _stationsLesPlusProches(position);
+        } on Object {
+          // On garde les quelques stations déjà trouvées.
+          if (result.isEmpty) rethrow;
         }
       }
       if (requestId != _requestId) return;
       _applyResult(result);
-    } on Exception {
+    } on Object {
+      // Object et pas Exception : une réponse mal formée lève une TypeError,
+      // sinon le chargement ne s'arrêterait jamais.
       if (requestId != _requestId) return;
       _stations = [];
       _selected = null;
@@ -304,6 +298,25 @@ class Page1ViewModel extends ChangeNotifier {
 
     _isLoading = false;
     _notify();
+  }
+
+  /// Les [stationsMinimum] stations les plus proches, sans limite de distance.
+  Future<List<Station>> _stationsLesPlusProches(Coordonnees position) async {
+    final result = await _repository.getStationsProches(
+      latitude: position.latitude,
+      longitude: position.longitude,
+      rayonKm: null,
+      carburant: _carburant,
+      triParPrix: false,
+      limit: stationsMinimum,
+    );
+    if (_triParPrix) {
+      result.sort(
+        (a, b) => (prixDe(a) ?? double.infinity)
+            .compareTo(prixDe(b) ?? double.infinity),
+      );
+    }
+    return result;
   }
 
   void _applyResult(List<Station> result) {
