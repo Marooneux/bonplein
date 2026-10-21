@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
 import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
 import 'package:flutter/material.dart';
@@ -18,11 +20,20 @@ class MapWidget extends StatefulWidget {
 
 class _MapWidgetState extends State<MapWidget> {
   Position? position;
+  // Chaque valeur envoyée recentre la carte sur l'utilisateur
+  // (null = garder le zoom actuel).
+  final _recentrerController = StreamController<double?>();
 
   @override
   void initState() {
     super.initState();
     getPosition();
+  }
+
+  @override
+  void dispose() {
+    unawaited(_recentrerController.close());
+    super.dispose();
   }
 
   Future<void> getPosition() async {
@@ -76,19 +87,58 @@ class _MapWidgetState extends State<MapWidget> {
               ),
             ),
             const RichAttributionWidget(
+              alignment: AttributionAlignment.bottomLeft,
+              showFlutterMapAttribution: false,
               attributions: [TextSourceAttribution('OpenStreetMap contributors')],
             ),
             CurrentLocationLayer(
-              alignPositionOnUpdate: AlignOnUpdate.always,
+              alignPositionStream: _recentrerController.stream,
+              alignPositionOnUpdate: AlignOnUpdate.once,
             ), // User location
             // En dernier pour rester au-dessus des marqueurs.
             const MapCompass(icon: _CompassIcon()),
+            Align(
+              alignment: Alignment.bottomRight,
+              // Sous la boussole (10 de padding + 48 de bouton).
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 62, 10, 10),
+                child: IconButton(
+                  padding: EdgeInsets.zero,
+                  tooltip: 'Recentrer',
+                  onPressed: () => _recentrerController.add(null),
+                  icon: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: _boutonCarteDecoration,
+                    child: const Icon(
+                      Icons.my_location,
+                      color: AppColors.blueFonce,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+// Style commun aux boutons ronds posés sur la carte.
+const _boutonCarteDecoration = BoxDecoration(
+  color: AppColors.blanc,
+  shape: BoxShape.circle,
+  border: Border.fromBorderSide(BorderSide(color: AppColors.neutral200)),
+  boxShadow: [
+    BoxShadow(
+      color: Color(0x33000000),
+      blurRadius: 6,
+      offset: Offset(0, 2),
+    ),
+  ],
+);
 
 class _CompassIcon extends StatelessWidget {
   const _CompassIcon();
@@ -98,18 +148,7 @@ class _CompassIcon extends StatelessWidget {
     return Container(
       width: 44,
       height: 44,
-      decoration: BoxDecoration(
-        color: AppColors.blanc,
-        shape: BoxShape.circle,
-        border: Border.all(color: AppColors.neutral200),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33000000),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
-      ),
+      decoration: _boutonCarteDecoration,
       child: CustomPaint(painter: _CompassNeedlePainter()),
     );
   }
