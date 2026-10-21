@@ -58,6 +58,7 @@ class Page1ViewModel extends ChangeNotifier {
   Coordonnees? _userPosition;
   Timer? _debounce;
   int _addressRequestId = 0;
+  final _reinitialisationCarte = StreamController<void>.broadcast();
 
   Coordonnees? get position => _position;
   String? get positionLabel => _positionLabel;
@@ -69,6 +70,9 @@ class Page1ViewModel extends ChangeNotifier {
   bool get hasLocation => _position != null;
   bool get triParPrix => _triParPrix;
   List<AddressSuggestion> get suggestions => _suggestions;
+
+  /// Émet quand la carte de l'accueil doit revenir à sa position d'origine.
+  Stream<void> get reinitialisationCarte => _reinitialisationCarte.stream;
 
   double? prixDe(Station station) {
     for (final c in station.carburants) {
@@ -240,6 +244,25 @@ class Page1ViewModel extends ChangeNotifier {
     );
   }
 
+  /// Retour sur l'accueil après une recherche : on revient autour de
+  /// l'utilisateur, comme à l'ouverture de l'app.
+  Future<void> reinitialiserPosition() async {
+    _reinitialisationCarte.add(null);
+    final userPosition = _userPosition;
+    if (userPosition != null) {
+      return selectLocation('Autour de moi', userPosition);
+    }
+    // Sans GPS, l'accueil n'affichait aucune station au départ.
+    _requestId++;
+    _position = null;
+    _positionLabel = null;
+    _stations = [];
+    _selected = null;
+    _isLoading = false;
+    _errorMessage = null;
+    _notify();
+  }
+
   /// Tri de la liste : les plus proches (false) ou les moins chères (true).
   Future<void> setTriParPrix({required bool triParPrix}) async {
     if (_triParPrix == triParPrix) return;
@@ -343,6 +366,7 @@ class Page1ViewModel extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _debounce?.cancel();
+    unawaited(_reinitialisationCarte.close());
     super.dispose();
   }
 }

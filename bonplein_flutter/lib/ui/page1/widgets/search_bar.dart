@@ -40,6 +40,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     if (!mounted) return;
     _controller.clear();
     widget.viewModel.searchAddress('');
+    unawaited(widget.viewModel.reinitialiserPosition());
   }
 
   @override

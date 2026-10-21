@@ -18,22 +18,37 @@ class MapWidget extends StatefulWidget {
   State<MapWidget> createState() => _MapWidgetState();
 }
 
+const _zoomParDefaut = 13.0;
+
 class _MapWidgetState extends State<MapWidget> {
   Position? position;
   // Chaque valeur envoyée recentre la carte sur l'utilisateur
-  // (null = garder le zoom actuel).
+  // avec ce zoom (null = garder le zoom actuel).
   final _recentrerController = StreamController<double?>();
+  final _mapController = MapController();
+  late final StreamSubscription<void> _reinitialisationSubscription;
 
   @override
   void initState() {
     super.initState();
     getPosition();
+    _reinitialisationSubscription =
+        widget.viewModel.reinitialisationCarte.listen((_) => _reinitialiser());
   }
 
   @override
   void dispose() {
+    unawaited(_reinitialisationSubscription.cancel());
     unawaited(_recentrerController.close());
+    _mapController.dispose();
     super.dispose();
+  }
+
+  /// Remet la carte comme à l'ouverture : nord en haut, centrée sur
+  /// l'utilisateur au zoom par défaut.
+  void _reinitialiser() {
+    _mapController.rotate(0);
+    _recentrerController.add(_zoomParDefaut);
   }
 
   Future<void> getPosition() async {
@@ -57,9 +72,10 @@ class _MapWidgetState extends State<MapWidget> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: FlutterMap(
+          mapController: _mapController,
           options: const MapOptions(
             initialCenter: LatLng(43.604, 1.444),
-            initialZoom: 15,
+            initialZoom: _zoomParDefaut,
           ),
           children: [
             TileLayer(
@@ -105,7 +121,7 @@ class _MapWidgetState extends State<MapWidget> {
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   tooltip: 'Recentrer',
-                  onPressed: () => _recentrerController.add(null),
+                  onPressed: () => _recentrerController.add(_zoomParDefaut),
                   icon: Container(
                     width: 44,
                     height: 44,
