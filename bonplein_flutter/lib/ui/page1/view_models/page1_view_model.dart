@@ -278,8 +278,9 @@ class Page1ViewModel extends ChangeNotifier {
     await loadStations();
   }
 
-  /// On touche une pastille sur la carte : la carte du bas change.
-  void selectStation(Station station) {
+  /// On touche une pastille sur la carte : sa fiche s'ouvre
+  /// (null la ferme).
+  void selectStation(Station? station) {
     _selected = station;
     _notify();
   }

@@ -1,7 +1,11 @@
 import 'dart:async';
 
+import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
+import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
+import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
 import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
+import 'package:bonplein_flutter/ui/pageInfoStation/page_info_station.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_compass/flutter_map_compass.dart';
@@ -73,9 +77,11 @@ class _MapWidgetState extends State<MapWidget> {
         borderRadius: BorderRadius.circular(8),
         child: FlutterMap(
           mapController: _mapController,
-          options: const MapOptions(
-            initialCenter: LatLng(43.604, 1.444),
+          options: MapOptions(
+            initialCenter: const LatLng(43.604, 1.444),
             initialZoom: _zoomParDefaut,
+            // Toucher la carte à côté d'une pastille ferme la fiche.
+            onTap: (_, _) => widget.viewModel.selectStation(null),
           ),
           children: [
             TileLayer(
@@ -84,19 +90,40 @@ class _MapWidgetState extends State<MapWidget> {
             ),
             ListenableBuilder(
               listenable: widget.viewModel,
-              builder: (context, _) => MarkerLayer(
-                markers: [
-                  for (final station in widget.viewModel.stations)
-                    Marker(
-                      point: LatLng(station.latitude, station.longitude),
-                      width: 36,
-                      height: 36,
-                      child: _StationMarker(
-                        niveau: widget.viewModel.niveauPrix(station),
+              builder: (context, _) {
+                final selected = widget.viewModel.selectedStation;
+                return MarkerLayer(
+                  // Pompes et fiche restent droites quand la carte tourne.
+                  rotate: true,
+                  markers: [
+                    for (final station in widget.viewModel.stations)
+                      Marker(
+                        point: LatLng(station.latitude, station.longitude),
+                        width: 36,
+                        height: 36,
+                        child: GestureDetector(
+                          onTap: () => widget.viewModel.selectStation(station),
+                          child: _StationMarker(
+                            niveau: widget.viewModel.niveauPrix(station),
+                          ),
+                        ),
                       ),
-                    ),
-                ],
-              ),
+                    // En dernier pour passer au-dessus des autres pastilles.
+                    if (selected != null)
+                      Marker(
+                        point: LatLng(selected.latitude, selected.longitude),
+                        width: _StationFiche.largeur,
+                        height: _StationFiche.hauteur,
+                        // La pointe de la fiche juste au-dessus de la pastille.
+                        alignment: Alignment.topCenter,
+                        child: _StationFiche(
+                          station: selected,
+                          viewModel: widget.viewModel,
+                        ),
+                      ),
+                  ],
+                );
+              },
             ),
             const RichAttributionWidget(
               alignment: AttributionAlignment.bottomLeft,
@@ -152,6 +179,132 @@ const _boutonCarteDecoration = BoxDecoration(
   ],
 );
 
+Color _couleurPrix(PriceLevel? niveau) => switch (niveau) {
+      PriceLevel.bas => AppColors.vert,
+      PriceLevel.moyen => AppColors.orange,
+      PriceLevel.eleve => AppColors.rouge,
+      null => AppColors.neutral400,
+    };
+
+String _formatNombre(double valeur, int decimales) =>
+    valeur.toStringAsFixed(decimales).replaceAll('.', ',');
+
+/// Petite fiche en bulle au-dessus de la pastille touchée.
+/// La toucher ouvre la page de la station.
+class _StationFiche extends StatelessWidget {
+  const _StationFiche({required this.station, required this.viewModel});
+
+  static const largeur = 240.0;
+  static const hauteur = 140.0;
+
+  final Station station;
+  final Page1ViewModel viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    final prix = viewModel.prixDe(station);
+    final distance = viewModel.distanceKm(station);
+    final temps = viewModel.tempsTrajetMin(station);
+    final nom = station.nom.isNotEmpty ? station.nom : station.adresse;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Material(
+          color: AppColors.blanc,
+          elevation: 4,
+          borderRadius: BorderRadius.circular(12),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute<void>(
+                builder: (_) => PageInfoStation(
+                  station: station,
+                  distanceKm: distance,
+                  tempsMin: temps,
+                ),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          nom,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.titreCarte,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          station.ville,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTextStyle.texteSecondaire,
+                        ),
+                        if (distance != null && temps != null) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            '${_formatNombre(distance, 1)} km · $temps min',
+                            style: AppTextStyle.metaPetite,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (prix != null) ...[
+                    const SizedBox(width: AppSpacing.xs),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _formatNombre(prix, 3),
+                          style: AppTextStyle.prixCarte.copyWith(
+                            color: _couleurPrix(viewModel.niveauPrix(station)),
+                          ),
+                        ),
+                        Text('€/L', style: AppTextStyle.metaPetite),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+        CustomPaint(
+          size: const Size(16, 8),
+          painter: _PointeFichePainter(),
+        ),
+        // Moitié de la pastille (36 / 2) + un petit écart.
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+/// Petit triangle sous la fiche, qui pointe vers la pastille.
+class _PointeFichePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final pointe = Path()
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
+    canvas.drawPath(pointe, Paint()..color = AppColors.blanc);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
 /// Pastille ronde avec une pompe, centrée sur la station, colorée
 /// selon le prix par rapport aux autres stations.
 class _StationMarker extends StatelessWidget {
@@ -161,16 +314,9 @@ class _StationMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final couleur = switch (niveau) {
-      PriceLevel.bas => AppColors.vert,
-      PriceLevel.moyen => AppColors.orange,
-      PriceLevel.eleve => AppColors.rouge,
-      null => AppColors.neutral400,
-    };
-
     return Container(
       decoration: BoxDecoration(
-        color: couleur,
+        color: _couleurPrix(niveau),
         shape: BoxShape.circle,
         border: const Border.fromBorderSide(
           BorderSide(color: AppColors.blanc, width: 2),
