@@ -89,14 +89,10 @@ class _MapWidgetState extends State<MapWidget> {
                   for (final station in widget.viewModel.stations)
                     Marker(
                       point: LatLng(station.latitude, station.longitude),
-                      width: 32,
-                      height: 32,
-                      // La pointe de l'icône sur la station.
-                      alignment: Alignment.topCenter,
-                      child: const Icon(
-                        Icons.location_on,
-                        color: AppColors.vert,
-                        size: 32,
+                      width: 36,
+                      height: 36,
+                      child: _StationMarker(
+                        niveau: widget.viewModel.niveauPrix(station),
                       ),
                     ),
                 ],
@@ -155,6 +151,46 @@ const _boutonCarteDecoration = BoxDecoration(
     ),
   ],
 );
+
+/// Pastille ronde avec une pompe, centrée sur la station, colorée
+/// selon le prix par rapport aux autres stations.
+class _StationMarker extends StatelessWidget {
+  const _StationMarker({required this.niveau});
+
+  final PriceLevel? niveau;
+
+  @override
+  Widget build(BuildContext context) {
+    final couleur = switch (niveau) {
+      PriceLevel.bas => AppColors.vert,
+      PriceLevel.moyen => AppColors.orange,
+      PriceLevel.eleve => AppColors.rouge,
+      null => AppColors.neutral400,
+    };
+
+    return Container(
+      decoration: BoxDecoration(
+        color: couleur,
+        shape: BoxShape.circle,
+        border: const Border.fromBorderSide(
+          BorderSide(color: AppColors.blanc, width: 2),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.local_gas_station,
+        color: AppColors.blanc,
+        size: 20,
+      ),
+    );
+  }
+}
 
 class _CompassIcon extends StatelessWidget {
   const _CompassIcon();
