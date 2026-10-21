@@ -13,6 +13,7 @@ typedef Coordonnees = ({double latitude, double longitude});
 typedef AddressSuggestion = ({String label, double latitude, double longitude});
 
 enum PriceLevel { bas, moyen, eleve }
+enum LocationProblem { servicesDisabled, denied, deniedForever, unavailable }
 
 TypeCarburant? _carburantDepuisBouton(String bouton) {
   return switch (bouton) {
@@ -50,6 +51,8 @@ class Page1ViewModel extends ChangeNotifier {
   int _requestId = 0;
   bool _disposed = false;
   bool _triParPrix = false;
+  bool _isLocating = false;
+  LocationProblem? _locationProblem;
 
   List<AddressSuggestion> _suggestions = [];
   Coordonnees? _userPosition;
@@ -65,6 +68,8 @@ class Page1ViewModel extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   bool get hasLocation => _position != null;
   bool get triParPrix => _triParPrix;
+  bool get isLocating => _isLocating;
+  LocationProblem? get locationProblem => _locationProblem;
   List<AddressSuggestion> get suggestions => _suggestions;
 
   double? prixDe(Station station) {
@@ -105,28 +110,60 @@ class Page1ViewModel extends ChangeNotifier {
 
   /// Barre de recherche ou bouton de localisation, on choisit une position.
   Future<void> selectLocation(String label, Coordonnees position) {
+    _locationProblem = null;
     _positionLabel = label;
     _position = position;
     return loadStations();
   }
 
-  /// Récupère la position GPS de l'utilisateur, pour proposer en premier
-  /// les adresses proches de lui. Sans permission, on ne fait rien.
-  Future<void> loadUserPosition() async {
+  /// Récupère la position GPS de l'utilisateur
+  Future<Coordonnees?> _readGps() async {
+    _locationProblem = null;
     try {
+      if (!await Geolocator.isLocationServiceEnabled()) {
+        _locationProblem = LocationProblem.servicesDisabled;
+        return null;
+      }
       var permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        return;
+      if (permission == LocationPermission.denied) {
+        _locationProblem = LocationProblem.denied;
+        return null;
       }
-      final p = await Geolocator.getCurrentPosition();
-      _userPosition = (latitude: p.latitude, longitude: p.longitude);
+      if (permission == LocationPermission.deniedForever) {
+        _locationProblem = LocationProblem.deniedForever;
+        return null;
+      }
+      final p = await Geolocator.getCurrentPosition().timeout(
+        const Duration(seconds: 15),
+      );
+      return (latitude: p.latitude, longitude: p.longitude);
     } on Exception {
-      // GPS désactivé : la recherche marche quand même, sans priorité.
+      _locationProblem = LocationProblem.unavailable;
+      return null;
     }
+  }
+
+  /// Récupère la position GPS de l'utilisateur, pour proposer en premier
+  Future<void> loadUserPosition() async {
+    final gps = await _readGps();
+    if (gps != null) _userPosition = gps;
+  }
+  // Utilise la position GPS comme point de départ de la recherche
+  Future<void> useCurrentLocation() async {
+    _isLocating = true;
+    _notify();
+
+    final gps = await _readGps();
+    if (gps != null) {
+      _userPosition = gps;
+      await selectLocation('Ma position', gps);
+    }
+
+    _isLocating = false;
+    _notify();
   }
 
   /// Appelée à chaque lettre tapée dans la barre de recherche.
