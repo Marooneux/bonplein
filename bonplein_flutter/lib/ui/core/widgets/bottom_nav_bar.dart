@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
 import 'package:bonplein_flutter/ui/page1/accueil.dart';
-
+import 'package:bonplein_flutter/ui/page5_Profile/profile_page.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -18,7 +18,7 @@ class _HomePageState extends State<HomePage> {
     Center(child: Text('Trajets')),
     Center(child: Text('Notifications')),
     Center(child: Text('Statistiques')),
-    Center(child: Text('Profil')),
+    ProfilePage(),
   ];
 
   // Un Navigator par onglet : les pages ouvertes avec Navigator.push

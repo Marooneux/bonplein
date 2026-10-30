@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="ab16d73d-ad66-4aca-8449-61c334f29ca5" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/bonplein_api/config.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bonplein_api/connexion.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/bonplein_api/inscription.php" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/domain/models/utilisateur.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/profile_page.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/view_models/profile_view_model.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/widgets/auth_form.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/widgets/auth_text_field.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/widgets/profile_dashboard.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/widgets/profile_header.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/widgets/profile_menu_item.dart" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/page5_Profile/widgets/stat_card.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/caches/deviceStreaming.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/libraries/Dart_Packages.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bonplein_api/config.local.php" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_api/config.local.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/core/widgets/bottom_nav_bar.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../bonplein_flutter/lib/ui/core/widgets/bottom_nav_bar.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/GeneratedPluginRegistrant.swift" beforeDir="false" afterPath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/GeneratedPluginRegistrant.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/ephemeral/Flutter-Generated.xcconfig" beforeDir="false" afterPath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/ephemeral/Flutter-Generated.xcconfig" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/ephemeral/flutter_export_environment.sh" beforeDir="false" afterPath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/ephemeral/flutter_export_environment.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/ephemeral/flutter_native_integration.env" beforeDir="false" afterPath="$PROJECT_DIR$/../bonplein_flutter/macos/Flutter/ephemeral/flutter_native_integration.env" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../bonplein_flutter/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../bonplein_flutter/pubspec.lock" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8,
+  "fromUser": false
+}]]></component>
+  <component name="ProjectId" id="3LP8FW3zrRAZoRbr2OrD95FxLyH" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "profile",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "C:/Users/Etudiant/Documents/GitHub/bonplein/backend",
+    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ab16d73d-ad66-4aca-8449-61c334f29ca5" name="Changes" comment="" />
+      <created>1793344238292</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1793344238292</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
