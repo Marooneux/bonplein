@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 
-Widget buildDistanceTrajet() => Container(
+Widget buildDistanceTrajet(double? distanceKm, int? tempsMin) => Container(
   padding: const EdgeInsets.all(16),
   decoration: BoxDecoration(
     color: Colors.white,
@@ -21,9 +21,11 @@ Widget buildDistanceTrajet() => Container(
       Expanded(
         child: Column(
           children: [
-            const Text(
-              '0,8 km',
-              style: TextStyle(
+            Text(
+              distanceKm == null
+                  ? '–'
+                  : '${distanceKm.toStringAsFixed(1).replaceAll('.', ',')} km',
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
@@ -52,9 +54,9 @@ Widget buildDistanceTrajet() => Container(
       Expanded(
         child: Column(
           children: [
-            const Text(
-              '4 min',
-              style: TextStyle(
+            Text(
+              tempsMin == null ? '–' : '$tempsMin min',
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.green,

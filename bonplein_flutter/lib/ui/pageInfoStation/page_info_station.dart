@@ -1,9 +1,9 @@
-
+import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:flutter/material.dart';
 import 'widgets/widget_prix_carburants.dart';
 import 'widgets/widget_nom_station.dart';
 import 'widgets/widget_distance_trajet.dart';
-
+import 'widgets/widget_maj_station.dart';
 // ============================================================
 // PAGE : Informations détaillées d'une station
 // ============================================================
@@ -23,11 +23,16 @@ import 'widgets/widget_distance_trajet.dart';
 
 class PageInfoStation extends StatefulWidget {
 
-  // TODO : récupérer la station sélectionnée depuis la page précédente.
-  // Exemple : final Station station;
-  // La station sera transmise au constructeur avec un paramètre requis.
+  final Station station;
+  final double? distanceKm;
+  final int? tempsMin;
 
-  const PageInfoStation({super.key,});
+  const PageInfoStation({
+    super.key,
+    required this.station,
+    this.distanceKm,
+    this.tempsMin,
+  });
 
   @override
   State<PageInfoStation> createState() => _PageInfoStationState();
@@ -86,15 +91,18 @@ class _PageInfoStationState extends State<PageInfoStation>{
       children: [
 
         // Section 1 : Nom et adresse de la station
-        buildNomParking(),
+        buildNomParking(widget.station),
+        const SizedBox(height: 24),
+
+        buildMajStation(widget.station.carburants),
         const SizedBox(height: 24),
 
         // Section 2 : Distance et temps de trajet
-        buildDistanceTrajet(),
+        buildDistanceTrajet(widget.distanceKm, widget.tempsMin),
         const SizedBox(height: 24),
 
         // Section 3 : Prix des carburants
-        buildPrixCarburants()
+        buildPrixCarburants(widget.station.carburants)
       ],
     ),
   );
@@ -121,12 +129,16 @@ class _PageInfoStationState extends State<PageInfoStation>{
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Nom et adresse
-              buildNomParking(),
+              buildNomParking(widget.station),
+
+              const SizedBox(height: 24),
+
+              buildMajStation(widget.station.carburants),
 
               const SizedBox(height: 24),
 
               // Distance et temps de trajet en voiture.
-              buildDistanceTrajet(),
+              buildDistanceTrajet(widget.distanceKm, widget.tempsMin),
             ],
           ),
         ),
@@ -138,7 +150,7 @@ class _PageInfoStationState extends State<PageInfoStation>{
         Expanded(
           flex: 2,
           child: SingleChildScrollView(
-            child: buildPrixCarburants(),
+            child: buildPrixCarburants(widget.station.carburants),
           ),
         ),
       ],

@@ -1,10 +1,7 @@
+import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:flutter/material.dart';
 
-
-final String nomParking = 'Station TotalEnergies';
-final String adresseParking = '12 rue de Metz, Toulouse';
-
-Widget buildNomParking() => Container(
+Widget buildNomParking(Station station) => Container(
   padding: const EdgeInsets.all(16),
   decoration: BoxDecoration(
   ),
@@ -33,7 +30,7 @@ Widget buildNomParking() => Container(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              nomParking,
+              station.nom,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -42,7 +39,7 @@ Widget buildNomParking() => Container(
             ),
             const SizedBox(height: 8),
             Text(
-              adresseParking,
+              '${station.adresse}, ${station.codePostal} ${station.ville}',
               style: const TextStyle(
                 fontSize: 14,
                 color: Colors.black54,
@@ -54,4 +51,3 @@ Widget buildNomParking() => Container(
     ],
   ),
 );
-

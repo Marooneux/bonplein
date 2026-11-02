@@ -38,18 +38,12 @@ class _MapWidgetState extends State<MapWidget> {
   Widget build(BuildContext context) {
     return Container(
       height: 500,
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.black, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: FlutterMap(
           options: const MapOptions(
             initialCenter: LatLng(43.604, 1.444),
-            initialZoom: 14,
+            initialZoom: 15,
           ),
           children: [
             TileLayer(
