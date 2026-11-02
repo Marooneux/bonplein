@@ -1,3 +1,4 @@
+import 'package:bonplein_flutter/ui/core/themes/app_theme.dart';
 import 'package:bonplein_flutter/ui/core/widgets/bottom_nav_bar.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
+      theme: AppTheme.light,
       home: const HomePage(),
     );
   }
