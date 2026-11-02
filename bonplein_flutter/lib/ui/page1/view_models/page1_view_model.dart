@@ -11,6 +11,7 @@ import 'package:geolocator/geolocator.dart';
 
 typedef Coordonnees = ({double latitude, double longitude});
 typedef AddressSuggestion = ({String label, double latitude, double longitude});
+typedef ZoneCarte = ({double sud, double ouest, double nord, double est});
 
 enum PriceLevel { bas, moyen, eleve }
 
@@ -33,6 +34,9 @@ class Page1ViewModel extends ChangeNotifier {
   /// Nombre de stations affichées au minimum, même si elles sont loin.
   static const stationsMinimum = 5;
 
+  /// Au-delà, les prix de la carte sont retéléchargés.
+  static const _dureeCache = Duration(minutes: 10);
+
   final StationServiceRepository _repository;
   final Dio _dio = Dio(
     BaseOptions(
@@ -48,6 +52,12 @@ class Page1ViewModel extends ChangeNotifier {
   TypeCarburant? _filtreCarte;
   // Accueil (true) ou liste des stations d'une adresse (false).
   bool _surCarte = true;
+  // Partie de la carte visible à l'écran, null tant qu'elle n'est pas prête.
+  ZoneCarte? _zoneCarte;
+  Timer? _debounceZone;
+  // Toutes les stations de France, téléchargées une fois pour la carte.
+  ({List<Station> stations, DateTime chargeLe})? _toutesLesStations;
+  Future<List<Station>>? _telechargement;
   List<Station> _stations = [];
   Station? _selected;
   double _prixMin = 0;
@@ -264,15 +274,12 @@ class Page1ViewModel extends ChangeNotifier {
     if (userPosition != null) {
       return selectLocation('Autour de moi', userPosition);
     }
-    // Sans GPS, l'accueil n'affichait aucune station au départ.
-    _requestId++;
+    // Sans GPS, la carte revient à sa position par défaut : on affiche les
+    // stations de la zone visible.
     _position = null;
     _positionLabel = null;
-    _stations = [];
     _selected = null;
-    _isLoading = false;
-    _errorMessage = null;
-    _notify();
+    return loadStations();
   }
 
   /// Tri de la liste : les plus proches (false) ou les moins chères (true).
@@ -296,6 +303,16 @@ class Page1ViewModel extends ChangeNotifier {
     await loadStations();
   }
 
+  /// La carte a bougé (déplacement ou zoom) : on charge les stations de la
+  /// zone visible. Plus on dézoome, plus il y en a.
+  void zoneCarteChangee(ZoneCarte zone) {
+    _zoneCarte = zone;
+    if (!_surCarte) return;
+    // On attend que la carte s'arrête de bouger avant de filtrer.
+    _debounceZone?.cancel();
+    _debounceZone = Timer(const Duration(milliseconds: 150), loadStations);
+  }
+
   /// On touche une pastille sur la carte : sa fiche s'ouvre
   /// (null la ferme).
   void selectStation(Station? station) {
@@ -306,6 +323,8 @@ class Page1ViewModel extends ChangeNotifier {
   /// Cherche les stations autour de la position, pour le carburant choisi.
   Future<void> loadStations() async {
     final position = _position;
+    final zone = _zoneCarte;
+    if (_surCarte && zone != null) return _loadStationsZone(zone);
     if (position == null) {
       _notify();
       return;
@@ -348,6 +367,79 @@ class Page1ViewModel extends ChangeNotifier {
     _notify();
   }
 
+  /// Stations de la partie visible de la carte de l'accueil.
+  Future<void> _loadStationsZone(ZoneCarte zone) async {
+    final requestId = ++_requestId;
+    _errorMessage = null;
+
+    final toutes = _toutesLesStations;
+    if (toutes != null) {
+      // Déjà téléchargées : on filtre tout de suite, même si les prix ont
+      // un peu vieilli, sans attendre l'API.
+      _isLoading = false;
+      _applyResult(_dansZone(toutes.stations, zone));
+      _notify();
+      if (DateTime.now().difference(toutes.chargeLe) < _dureeCache) return;
+    } else {
+      _isLoading = true;
+      _notify();
+      // Le téléchargement complet prend plusieurs secondes : en attendant,
+      // une petite requête affiche les stations les plus proches.
+      unawaited(_loadApercuZone(zone, requestId));
+    }
+
+    try {
+      final stations = await (_telechargement ??= _repository
+          .getToutesLesStations()
+          .whenComplete(() => _telechargement = null));
+      _toutesLesStations = (stations: stations, chargeLe: DateTime.now());
+      if (requestId != _requestId) return;
+      // La carte a pu bouger pendant le téléchargement.
+      _applyResult(_dansZone(stations, _zoneCarte ?? zone));
+    } on Object {
+      // On garde les pastilles déjà affichées.
+      if (requestId != _requestId) return;
+      if (toutes == null) _errorMessage = 'Impossible de charger les stations.';
+    }
+
+    _isLoading = false;
+    _notify();
+  }
+
+  /// Les stations les plus proches du centre de [zone], en attendant que
+  /// toutes les stations soient téléchargées.
+  Future<void> _loadApercuZone(ZoneCarte zone, int requestId) async {
+    try {
+      final result = await _repository.getStationsDansZone(
+        sud: zone.sud,
+        ouest: zone.ouest,
+        nord: zone.nord,
+        est: zone.est,
+        carburant: _carburantCharge,
+      );
+      // Inutile si la carte a bougé ou si tout est déjà téléchargé.
+      if (requestId != _requestId || _toutesLesStations != null) return;
+      _applyResult(result);
+      _notify();
+    } on Object {
+      // Le téléchargement complet prendra le relais.
+    }
+  }
+
+  /// Stations de [zone] qui proposent le carburant choisi sur la carte.
+  List<Station> _dansZone(List<Station> stations, ZoneCarte zone) {
+    final carburant = _carburantCharge;
+    return [
+      for (final s in stations)
+        if (s.latitude >= zone.sud &&
+            s.latitude <= zone.nord &&
+            s.longitude >= zone.ouest &&
+            s.longitude <= zone.est &&
+            (carburant == null || s.prixPourCarburant(carburant) != null))
+          s,
+    ];
+  }
+
   /// Les [stationsMinimum] stations les plus proches, sans limite de distance.
   Future<List<Station>> _stationsLesPlusProches(Coordonnees position) async {
     final result = await _repository.getStationsProches(
@@ -377,7 +469,11 @@ class Page1ViewModel extends ChangeNotifier {
     _prixMin = prix.isEmpty ? 0 : prix.reduce(min);
     _prixMax = prix.isEmpty ? 0 : prix.reduce(max);
 
-    _selected = null;
+    // La fiche ouverte reste ouverte si la station est encore affichée.
+    final selected = _selected;
+    _selected = selected == null
+        ? null
+        : _stations.where((s) => s.id == selected.id).firstOrNull;
   }
 
   void _notify() {
@@ -388,6 +484,7 @@ class Page1ViewModel extends ChangeNotifier {
   void dispose() {
     _disposed = true;
     _debounce?.cancel();
+    _debounceZone?.cancel();
     unawaited(_reinitialisationCarte.close());
     super.dispose();
   }

@@ -23,6 +23,15 @@ class MapWidget extends StatefulWidget {
 }
 
 const _zoomParDefaut = 13.0;
+// Position de la carte à l'ouverture, et sans GPS.
+const _centreParDefaut = LatLng(43.604, 1.444);
+
+// Une bulle remplace les pastilles quand au moins 5 stations tombent dans
+// la même case de 60 px à l'écran.
+const _stationsMinParBulle = 5;
+const _tailleCase = 60.0;
+// À partir de ce zoom, chaque station a sa pastille.
+const _zoomSansBulle = 15;
 
 class _MapWidgetState extends State<MapWidget> {
   Position? position;
@@ -31,6 +40,12 @@ class _MapWidgetState extends State<MapWidget> {
   final _recentrerController = StreamController<double?>();
   final _mapController = MapController();
   late final StreamSubscription<void> _reinitialisationSubscription;
+
+  // Les cases ne changent qu'avec le zoom ou les stations : inutile de
+  // les recalculer à chaque image quand on déplace la carte.
+  List<Station>? _stationsGroupees;
+  int? _zoomGroupes;
+  List<List<Station>> _groupes = [];
 
   @override
   void initState() {
@@ -49,10 +64,100 @@ class _MapWidgetState extends State<MapWidget> {
   }
 
   /// Remet la carte comme à l'ouverture : nord en haut, centrée sur
-  /// l'utilisateur au zoom par défaut.
+  /// l'utilisateur au zoom par défaut, ou sur la position par défaut
+  /// sans GPS.
   void _reinitialiser() {
     _mapController.rotate(0);
-    _recentrerController.add(_zoomParDefaut);
+    if (position == null) {
+      _mapController.move(_centreParDefaut, _zoomParDefaut);
+    } else {
+      _recentrerController.add(_zoomParDefaut);
+    }
+  }
+
+  /// Range les stations par case de [_tailleCase] px au zoom actuel.
+  List<List<Station>> _grouper(List<Station> stations, MapCamera camera) {
+    final zoom = camera.zoom.floor();
+    if (identical(stations, _stationsGroupees) && zoom == _zoomGroupes) {
+      return _groupes;
+    }
+    _stationsGroupees = stations;
+    _zoomGroupes = zoom;
+    if (zoom >= _zoomSansBulle) {
+      return _groupes = [for (final s in stations) [s]];
+    }
+    // Les positions en pixels au zoom entier ne bougent pas quand on déplace
+    // la carte : les bulles restent stables.
+    final cases = <(int, int), List<Station>>{};
+    for (final s in stations) {
+      final p = camera.projectAtZoom(
+        LatLng(s.latitude, s.longitude),
+        zoom.toDouble(),
+      );
+      final cle = ((p.dx / _tailleCase).floor(), (p.dy / _tailleCase).floor());
+      (cases[cle] ??= []).add(s);
+    }
+    return _groupes = cases.values.toList();
+  }
+
+  Marker _marqueurStation(Station station) => Marker(
+    point: LatLng(station.latitude, station.longitude),
+    width: 36,
+    height: 36,
+    child: GestureDetector(
+      onTap: () => widget.viewModel.selectStation(station),
+      child: _StationMarker(niveau: widget.viewModel.niveauPrix(station)),
+    ),
+  );
+
+  Marker _marqueurBulle(List<Station> groupe) {
+    final points = [for (final s in groupe) LatLng(s.latitude, s.longitude)];
+    final centre = LatLng(
+      points.map((p) => p.latitude).reduce((a, b) => a + b) / points.length,
+      points.map((p) => p.longitude).reduce((a, b) => a + b) / points.length,
+    );
+    return Marker(
+      point: centre,
+      width: 40,
+      height: 40,
+      child: GestureDetector(
+        // On zoome juste assez pour voir toutes les stations de la bulle.
+        onTap: () => _mapController.fitCamera(
+          CameraFit.coordinates(
+            coordinates: points,
+            padding: const EdgeInsets.all(48),
+          ),
+        ),
+        child: _ClusterBulle(
+          nombre: groupe.length,
+          niveau: _niveauMoinsChere(groupe),
+        ),
+      ),
+    );
+  }
+
+  /// Couleur de la station la moins chère du groupe.
+  PriceLevel? _niveauMoinsChere(List<Station> groupe) {
+    Station? moinsChere;
+    double? prixMin;
+    for (final s in groupe) {
+      final prix = widget.viewModel.prixDe(s);
+      if (prix != null && (prixMin == null || prix < prixMin)) {
+        prixMin = prix;
+        moinsChere = s;
+      }
+    }
+    return moinsChere == null ? null : widget.viewModel.niveauPrix(moinsChere);
+  }
+
+  void _envoyerZone(MapCamera camera) {
+    final bounds = camera.visibleBounds;
+    widget.viewModel.zoneCarteChangee((
+      sud: bounds.south,
+      ouest: bounds.west,
+      nord: bounds.north,
+      est: bounds.east,
+    ));
   }
 
   Future<void> getPosition() async {
@@ -78,10 +183,12 @@ class _MapWidgetState extends State<MapWidget> {
         child: FlutterMap(
           mapController: _mapController,
           options: MapOptions(
-            initialCenter: const LatLng(43.604, 1.444),
+            initialCenter: _centreParDefaut,
             initialZoom: _zoomParDefaut,
             // Toucher la carte à côté d'une pastille ferme la fiche.
             onTap: (_, _) => widget.viewModel.selectStation(null),
+            onMapReady: () => _envoyerZone(_mapController.camera),
+            onPositionChanged: (camera, _) => _envoyerZone(camera),
           ),
           children: [
             TileLayer(
@@ -91,24 +198,37 @@ class _MapWidgetState extends State<MapWidget> {
             ListenableBuilder(
               listenable: widget.viewModel,
               builder: (context, _) {
+                // Builder pour être reconstruit quand la carte bouge.
+                return Builder(
+                  builder: (context) {
+                    final groupes = _grouper(
+                      widget.viewModel.stations,
+                      MapCamera.of(context),
+                    );
+                    return MarkerLayer(
+                      // Pompes et bulles restent droites quand la carte tourne.
+                      rotate: true,
+                      markers: [
+                        for (final groupe in groupes)
+                          if (groupe.length >= _stationsMinParBulle)
+                            _marqueurBulle(groupe)
+                          else
+                            for (final station in groupe)
+                              _marqueurStation(station),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+            ListenableBuilder(
+              listenable: widget.viewModel,
+              builder: (context, _) {
                 final selected = widget.viewModel.selectedStation;
                 return MarkerLayer(
-                  // Pompes et fiche restent droites quand la carte tourne.
                   rotate: true,
                   markers: [
-                    for (final station in widget.viewModel.stations)
-                      Marker(
-                        point: LatLng(station.latitude, station.longitude),
-                        width: 36,
-                        height: 36,
-                        child: GestureDetector(
-                          onTap: () => widget.viewModel.selectStation(station),
-                          child: _StationMarker(
-                            niveau: widget.viewModel.niveauPrix(station),
-                          ),
-                        ),
-                      ),
-                    // En dernier pour passer au-dessus des autres pastilles.
+                    // Au-dessus des pastilles et des bulles.
                     if (selected != null)
                       Marker(
                         point: LatLng(selected.latitude, selected.longitude),
@@ -333,6 +453,44 @@ class _StationMarker extends StatelessWidget {
         Icons.local_gas_station,
         color: AppColors.blanc,
         size: 20,
+      ),
+    );
+  }
+}
+
+/// Bulle qui remplace plusieurs pastilles proches, avec leur nombre,
+/// colorée selon la station la moins chère qu'elle contient.
+class _ClusterBulle extends StatelessWidget {
+  const _ClusterBulle({required this.nombre, required this.niveau});
+
+  final int nombre;
+  final PriceLevel? niveau;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: _couleurPrix(niveau),
+        shape: BoxShape.circle,
+        border: const Border.fromBorderSide(
+          BorderSide(color: AppColors.blanc, width: 2),
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x33000000),
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Text(
+        '$nombre',
+        style: const TextStyle(
+          color: AppColors.blanc,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

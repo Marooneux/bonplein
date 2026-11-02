@@ -19,6 +19,13 @@ class StationServiceRepository {
           );
   final StationServiceApi _api;
 
+  /// Champs utilisés par [_mapperVersStation] : la réponse est 4 fois plus
+  /// légère qu'avec tous les champs.
+  static const _champsStation =
+      'id,latitude,longitude,cp,pop,adresse,ville,geom,'
+      'gazole_prix,gazole_maj,sp95_prix,sp95_maj,sp98_prix,sp98_maj,'
+      'e10_prix,e10_maj,e85_prix,e85_maj,gplc_prix,gplc_maj,services_service';
+
   /// Recherche les stations situées dans un rayon (en km) autour des
   /// coordonnées GPS fournies. Si un [carburant] est spécifié, seules les
   /// stations proposant ce carburant sont retournées, les résultats sont triés
@@ -52,6 +59,42 @@ class StationServiceRepository {
       orderBy: orderBy,
       limit: limit,
       offset: offset,
+    );
+
+    return reponse.results.map(_mapperVersStation).toList();
+  }
+
+  /// Toutes les stations de France (environ 10 000), en une seule requête
+  /// d'environ 1,3 Mo compressé.
+  Future<List<Station>> getToutesLesStations() async {
+    final reponse = await _api.exportRecords(select: _champsStation);
+    return reponse.map(_mapperVersStation).toList();
+  }
+
+  /// Les [limit] stations les plus proches du centre du rectangle
+  /// [sud]-[nord], [ouest]-[est] (la partie visible d'une carte). Si un
+  /// [carburant] est spécifié, seules les stations proposant ce carburant
+  /// sont retournées. Une seule petite requête : de quoi afficher vite
+  /// quelques stations en attendant [getToutesLesStations].
+  Future<List<Station>> getStationsDansZone({
+    required double sud,
+    required double ouest,
+    required double nord,
+    required double est,
+    TypeCarburant? carburant,
+    int limit = 100,
+  }) async {
+    final conditions = <String>[
+      'in_bbox(geom, $sud, $ouest, $nord, $est)',
+      if (carburant != null) '${carburant.champApi} is not null',
+    ];
+    final centre = "geom'POINT(${(ouest + est) / 2} ${(sud + nord) / 2})'";
+
+    final reponse = await _api.getRecords(
+      select: _champsStation,
+      where: conditions.join(' and '),
+      orderBy: 'distance(geom, $centre) asc',
+      limit: limit,
     );
 
     return reponse.results.map(_mapperVersStation).toList();

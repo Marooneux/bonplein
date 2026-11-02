@@ -25,4 +25,14 @@ abstract class StationServiceApi {
     @Query('exclude') String? exclude,
     @Query('timezone') String? timezone,
   });
+
+  /// Tout le jeu de données en une seule requête, sans la limite de 100
+  /// résultats de [getRecords].
+  @GET(
+    '/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json',
+  )
+  Future<List<StationService>> exportRecords({
+    @Query('select') String? select,
+    @Query('where') String? where,
+  });
 }
