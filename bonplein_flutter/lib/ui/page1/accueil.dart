@@ -41,7 +41,10 @@ class _AccueilState extends State<Accueil> {
             viewModel: _viewModel,
             hintText: 'Rechercher une adresse',
           ),
-          const FuelFilterWidget(),
+          FuelFilterWidget(
+            onFuelSelected: (bouton) =>
+                unawaited(_viewModel.selectFiltreCarte(bouton)),
+          ),
           const SizedBox(height: AppSpacing.xs),
           Expanded(child: MapWidget(viewModel: _viewModel)),
         ],

@@ -44,6 +44,10 @@ class Page1ViewModel extends ChangeNotifier {
   Coordonnees? _position;
   String? _positionLabel;
   TypeCarburant _carburant = TypeCarburant.sp95;
+  // Filtre de la carte de l'accueil (null = tous les carburants).
+  TypeCarburant? _filtreCarte;
+  // Accueil (true) ou liste des stations d'une adresse (false).
+  bool _surCarte = true;
   List<Station> _stations = [];
   Station? _selected;
   double _prixMin = 0;
@@ -63,6 +67,7 @@ class Page1ViewModel extends ChangeNotifier {
   Coordonnees? get position => _position;
   String? get positionLabel => _positionLabel;
   TypeCarburant get carburant => _carburant;
+  TypeCarburant? get filtreCarte => _filtreCarte;
   List<Station> get stations => _stations;
   Station? get selectedStation => _selected;
   bool get isLoading => _isLoading;
@@ -74,11 +79,14 @@ class Page1ViewModel extends ChangeNotifier {
   /// Émet quand la carte de l'accueil doit revenir à sa position d'origine.
   Stream<void> get reinitialisationCarte => _reinitialisationCarte.stream;
 
+  /// Carburant des stations chargées : la liste en demande toujours un,
+  /// la carte peut les afficher toutes.
+  TypeCarburant? get _carburantCharge => _surCarte ? _filtreCarte : _carburant;
+
   double? prixDe(Station station) {
-    for (final c in station.carburants) {
-      if (c.type == _carburant) return c.prix;
-    }
-    return null;
+    final carburant = _carburantCharge;
+    if (carburant == null) return null;
+    return station.prixPourCarburant(carburant);
   }
 
   double? distanceKm(Station station) {
@@ -238,6 +246,9 @@ class Page1ViewModel extends ChangeNotifier {
   /// L'utilisateur choisit une adresse dans la liste.
   Future<void> selectSuggestion(AddressSuggestion s) {
     _suggestions = [];
+    _surCarte = false;
+    // La liste reprend le carburant choisi sur la carte, s'il y en a un.
+    _carburant = _filtreCarte ?? _carburant;
     return selectLocation(
       s.label,
       (latitude: s.latitude, longitude: s.longitude),
@@ -248,6 +259,7 @@ class Page1ViewModel extends ChangeNotifier {
   /// l'utilisateur, comme à l'ouverture de l'app.
   Future<void> reinitialiserPosition() async {
     _reinitialisationCarte.add(null);
+    _surCarte = true;
     final userPosition = _userPosition;
     if (userPosition != null) {
       return selectLocation('Autour de moi', userPosition);
@@ -278,6 +290,12 @@ class Page1ViewModel extends ChangeNotifier {
     await loadStations();
   }
 
+  /// Boutons de carburant de la carte de l'accueil (null = Tous).
+  Future<void> selectFiltreCarte(String? bouton) async {
+    _filtreCarte = bouton == null ? null : _carburantDepuisBouton(bouton);
+    await loadStations();
+  }
+
   /// On touche une pastille sur la carte : sa fiche s'ouvre
   /// (null la ferme).
   void selectStation(Station? station) {
@@ -303,7 +321,7 @@ class Page1ViewModel extends ChangeNotifier {
       var result = await _repository.getStationsProches(
         latitude: position.latitude,
         longitude: position.longitude,
-        carburant: _carburant,
+        carburant: _carburantCharge,
         triParPrix: _triParPrix,
       );
       // Peu de stations autour : on prend les plus proches, même loin.
@@ -336,7 +354,7 @@ class Page1ViewModel extends ChangeNotifier {
       latitude: position.latitude,
       longitude: position.longitude,
       rayonKm: null,
-      carburant: _carburant,
+      carburant: _carburantCharge,
       triParPrix: false,
       limit: stationsMinimum,
     );
@@ -350,7 +368,10 @@ class Page1ViewModel extends ChangeNotifier {
   }
 
   void _applyResult(List<Station> result) {
-    _stations = result.where((s) => prixDe(s) != null).toList();
+    // Sans filtre, on garde aussi les stations sans prix connu.
+    _stations = _carburantCharge == null
+        ? result
+        : result.where((s) => prixDe(s) != null).toList();
 
     final prix = _stations.map(prixDe).whereType<double>();
     _prixMin = prix.isEmpty ? 0 : prix.reduce(min);
