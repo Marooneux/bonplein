@@ -1,4 +1,5 @@
 import 'package:bonplein_flutter/domain/models/station_service.dart';
+import 'package:bonplein_flutter/ui/pageInfoStation/widgets/widget_services_station.dart';
 import 'package:flutter/material.dart';
 import 'widgets/widget_prix_carburants.dart';
 import 'widgets/widget_nom_station.dart';
@@ -102,7 +103,8 @@ class _PageInfoStationState extends State<PageInfoStation>{
         const SizedBox(height: 24),
 
         // Section 3 : Prix des carburants
-        buildPrixCarburants(widget.station.carburants)
+        buildPrixCarburants(widget.station.carburants),
+        ServicesStation(services: widget.station.services),
       ],
     ),
   );
