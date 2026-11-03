@@ -1,104 +1,108 @@
+import 'package:bonplein_flutter/domain/models/station_service.dart';
+import 'package:bonplein_flutter/domain/models/type_carburant.dart';
+import 'package:bonplein_flutter/ui/page1/view_models/carte_view_model.dart';
+import 'package:bonplein_flutter/ui/page1/widgets/carte/marqueurs_carte.dart';
+import 'package:bonplein_flutter/ui/page1/widgets/carte/station_fiche.dart';
 import 'package:bonplein_flutter/ui/page1/widgets/map.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:geolocator_platform_interface/geolocator_platform_interface.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-/// Fausse implémentation de Geolocator : simule la réponse de l'utilisateur
-/// à la demande d'autorisation et enregistre les appels effectués.
-class FakeGeolocatorPlatform extends GeolocatorPlatform
-    with MockPlatformInterfaceMixin {
-  FakeGeolocatorPlatform({required this.permissionAfterRequest});
+import '../../../helpers/fake_geolocator.dart';
+import '../../../helpers/fake_station_repository.dart';
 
-  final LocationPermission permissionAfterRequest;
-  LocationPermission _permission = LocationPermission.denied;
+const TypeCarburant _sp95 = TypeCarburant.sp95;
 
-  int requestPermissionCalls = 0;
-  int getCurrentPositionCalls = 0;
-
-  static final Position fakePosition = Position(
-    latitude: 43.6,
-    longitude: 1.44,
-    timestamp: DateTime(2026),
-    accuracy: 5,
-    altitude: 0,
-    altitudeAccuracy: 0,
-    heading: 0,
-    headingAccuracy: 0,
-    speed: 0,
-    speedAccuracy: 0,
+/// Affiche la carte puis attend la fin du chargement des stations
+Future<CarteViewModel> pumpMap(
+  WidgetTester tester,
+  List<Station> stations,
+) async {
+  final viewModel = CarteViewModel(
+    repository: FakeStationRepository(
+      stations: stations,
+      medianes: {_sp95: 2.25},
+    ),
   );
+  addTearDown(viewModel.dispose);
+  await viewModel.selectFiltre('SP95');
 
-  @override
-  Future<LocationPermission> checkPermission() async => _permission;
-
-  @override
-  Future<LocationPermission> requestPermission() async {
-    requestPermissionCalls++;
-    _permission = permissionAfterRequest;
-    return _permission;
-  }
-
-  @override
-  Future<bool> isLocationServiceEnabled() async => true;
-
-  @override
-  Future<Position?> getLastKnownPosition({
-    bool forceLocationManager = false,
-  }) async => null;
-
-  @override
-  Future<Position> getCurrentPosition({
-    LocationSettings? locationSettings,
-  }) async {
-    getCurrentPositionCalls++;
-    return fakePosition;
-  }
-
-  @override
-  Stream<Position> getPositionStream({LocationSettings? locationSettings}) =>
-      const Stream.empty();
-
-  @override
-  Stream<ServiceStatus> getServiceStatusStream() => const Stream.empty();
-}
-
-Future<void> pumpMap(WidgetTester tester) async {
   await tester.pumpWidget(
-    const MaterialApp(home: Scaffold(body: MapWidget())),
+    MaterialApp(
+      home: Scaffold(body: MapWidget(viewModel: viewModel)),
+    ),
   );
-  // Laisse les futures de géolocalisation se résoudre.
+  // La carte attend 150 ms sans mouvement avant de charger
+  await tester.pump(const Duration(milliseconds: 200));
   await tester.pump();
-  await tester.pump(const Duration(seconds: 1));
+  return viewModel;
 }
+
+/// Stations écartées de 0,02° pour ne jamais tomber dans la même case
+List<Station> _eloignees(int nombre) => [
+  for (var i = 0; i < nombre; i++)
+    station(id: i, longitude: 1.40 + i * 0.02, prix: {_sp95: 2.00}),
+];
+
+/// Stations au même endroit donc dans la même case
+List<Station> _groupees(int nombre) => [
+  for (var i = 0; i < nombre; i++) station(id: i, prix: {_sp95: 2.00}),
+];
 
 void main() {
-  testWidgets('géolocalisation acceptée : la position est récupérée et affichée',
-      (tester) async {
-    final fake = FakeGeolocatorPlatform(
-      permissionAfterRequest: LocationPermission.whileInUse,
-    );
-    GeolocatorPlatform.instance = fake;
-
-    await pumpMap(tester);
-
-    expect(fake.requestPermissionCalls, greaterThan(0));
-    expect(fake.getCurrentPositionCalls, greaterThan(0));
-    expect(find.byType(DefaultLocationMarker), findsOneWidget);
-  });
-
-  testWidgets('géolocalisation refusée : aucune position récupérée ni affichée',
-      (tester) async {
-    final fake = FakeGeolocatorPlatform(
+  setUp(() {
+    GeolocatorPlatform.instance = FakeGeolocatorPlatform(
       permissionAfterRequest: LocationPermission.denied,
     );
-    GeolocatorPlatform.instance = fake;
+  });
 
-    await pumpMap(tester);
+  testWidgets('une pastille par station éloignée', (tester) async {
+    await pumpMap(tester, _eloignees(3));
 
-    expect(fake.requestPermissionCalls, greaterThan(0));
-    expect(fake.getCurrentPositionCalls, 0);
-    expect(find.byType(DefaultLocationMarker), findsNothing);
+    expect(find.byType(StationMarker), findsNWidgets(3));
+    expect(find.byType(ClusterBulle), findsNothing);
+  });
+
+  testWidgets('5 stations proches forment une bulle', (tester) async {
+    await pumpMap(tester, _groupees(5));
+
+    expect(find.byType(ClusterBulle), findsOneWidget);
+    expect(find.text('5'), findsOneWidget);
+    expect(find.byType(StationMarker), findsNothing);
+  });
+
+  testWidgets('4 stations proches restent des pastilles', (tester) async {
+    await pumpMap(tester, _groupees(4));
+
+    expect(find.byType(StationMarker), findsNWidgets(4));
+    expect(find.byType(ClusterBulle), findsNothing);
+  });
+
+  testWidgets('la pastille prend la couleur de son prix', (tester) async {
+    await pumpMap(tester, [
+      station(id: 1, prix: {_sp95: 2.10}),
+    ]);
+
+    final marqueur = tester.widget<StationMarker>(find.byType(StationMarker));
+    expect(marqueur.niveau, PriceLevel.bas);
+  });
+
+  testWidgets('toucher une pastille ouvre sa fiche', (tester) async {
+    final viewModel = await pumpMap(tester, _eloignees(1));
+
+    await tester.tap(find.byType(StationMarker));
+    await tester.pump();
+
+    expect(viewModel.selectedStation?.id, 0);
+    expect(find.byType(StationFiche), findsOneWidget);
+  });
+
+  testWidgets('le bouton i affiche la médiane du jour', (tester) async {
+    await pumpMap(tester, _eloignees(1));
+
+    await tester.tap(find.byIcon(Icons.info_outline));
+    await tester.pump();
+
+    expect(find.text('Médiane nationale du jour : 2,250 €/L'), findsOneWidget);
   });
 }

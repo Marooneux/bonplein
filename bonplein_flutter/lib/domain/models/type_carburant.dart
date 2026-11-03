@@ -10,4 +10,17 @@ enum TypeCarburant {
 
   final String nom;
   final String champApi;
+
+  /// Carburant d'un bouton du filtre comme SP95-E10 ou GPL-c
+  static TypeCarburant? depuisBouton(String bouton) {
+    return switch (bouton) {
+      'SP95' => TypeCarburant.sp95,
+      'SP95-E10' || 'E10' => TypeCarburant.e10,
+      'SP98' => TypeCarburant.sp98,
+      'Gazole' => TypeCarburant.gazole,
+      'E85' => TypeCarburant.e85,
+      'GPL' || 'GPL-c' => TypeCarburant.gplc,
+      _ => null,
+    };
+  }
 }

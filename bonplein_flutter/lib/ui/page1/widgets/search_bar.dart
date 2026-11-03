@@ -7,11 +7,14 @@ class SearchBarWidget extends StatefulWidget {
   const SearchBarWidget({
     required this.viewModel,
     required this.hintText,
+    this.onRetour,
     super.key,
   });
 
   final Page1ViewModel viewModel;
   final String hintText;
+  // Appelée au retour de la page de liste
+  final VoidCallback? onRetour;
   static const radius12 = Radius.circular(12);
 
   @override
@@ -39,8 +42,10 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
     );
     if (!mounted) return;
     _controller.clear();
-    widget.viewModel.searchAddress('');
-    unawaited(widget.viewModel.reinitialiserPosition());
+    widget.viewModel
+      ..searchAddress('')
+      ..reinitialiserPosition();
+    widget.onRetour?.call();
   }
 
   @override

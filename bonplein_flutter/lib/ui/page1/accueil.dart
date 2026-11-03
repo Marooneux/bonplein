@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 import 'package:bonplein_flutter/ui/core/widgets/widget_filtres_carburant.dart';
+import 'package:bonplein_flutter/ui/page1/view_models/carte_view_model.dart';
 import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
 import 'package:bonplein_flutter/ui/page1/widgets/map.dart';
 import 'package:bonplein_flutter/ui/page1/widgets/search_bar.dart';
@@ -16,18 +17,25 @@ class Accueil extends StatefulWidget {
 }
 
 class _AccueilState extends State<Accueil> {
-  late final Page1ViewModel _viewModel =
-      Page1ViewModel(repository: StationServiceRepository());
+  final _repository = StationServiceRepository();
+  late final _viewModel = Page1ViewModel(repository: _repository);
+  late final _carte = CarteViewModel(repository: _repository);
 
   @override
   void initState() {
     super.initState();
-    unawaited(_viewModel.loadUserPosition());
+    unawaited(_chargerPosition());
+  }
+
+  Future<void> _chargerPosition() async {
+    final position = await _viewModel.loadUserPosition();
+    if (mounted) _carte.positionUtilisateur = position;
   }
 
   @override
   void dispose() {
     _viewModel.dispose();
+    _carte.dispose();
     super.dispose();
   }
 
@@ -40,13 +48,17 @@ class _AccueilState extends State<Accueil> {
           SearchBarWidget(
             viewModel: _viewModel,
             hintText: 'Rechercher une adresse',
+            onRetour: () => unawaited(_carte.reinitialiser()),
           ),
           FuelFilterWidget(
-            onFuelSelected: (bouton) =>
-                unawaited(_viewModel.selectFiltreCarte(bouton)),
+            onFuelSelected: (bouton) {
+              unawaited(_carte.selectFiltre(bouton));
+              // La liste s'ouvrira avec le carburant choisi sur la carte
+              if (bouton != null) unawaited(_viewModel.selectFuel(bouton));
+            },
           ),
           const SizedBox(height: AppSpacing.xs),
-          Expanded(child: MapWidget(viewModel: _viewModel)),
+          Expanded(child: MapWidget(viewModel: _carte)),
         ],
       ),
     );
