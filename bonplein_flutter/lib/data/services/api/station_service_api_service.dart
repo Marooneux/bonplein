@@ -5,9 +5,8 @@ import 'package:retrofit/retrofit.dart';
 part 'station_service_api_service.g.dart';
 
 @RestApi(baseUrl: 'https://data.economie.gouv.fr/api/explore/v2.1')
-// L'analyseur dart recommande de ne pas avoir de classe abstraite avec une
-// seule méthode et d'utiliser plutôt une fonction. Cependant, Retrofit ne
-// fonctionne pas sans cette déclaration de classe abstraite @RestApi.
+// L'analyseur dart déconseille une classe abstraite avec une seule méthode
+// mais Retrofit a besoin de cette classe abstraite @RestApi pour fonctionner
 // ignore: one_member_abstracts
 abstract class StationServiceApi {
   factory StationServiceApi(Dio dio, {String baseUrl}) = _StationServiceApi;
@@ -26,8 +25,7 @@ abstract class StationServiceApi {
     @Query('timezone') String? timezone,
   });
 
-  /// Tout le jeu de données en une seule requête, sans la limite de 100
-  /// résultats de [getRecords].
+  /// Tout le jeu de données sans limite de nombre
   @GET(
     '/catalog/datasets/prix-des-carburants-en-france-flux-instantane-v2/exports/json',
   )

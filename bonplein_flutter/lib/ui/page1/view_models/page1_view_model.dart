@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math' show ln10, log, max, min;
+import 'dart:math' show ln10, log;
 
 import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 import 'package:bonplein_flutter/domain/models/station_service.dart';
@@ -29,13 +29,16 @@ TypeCarburant? _carburantDepuisBouton(String bouton) {
 
 class Page1ViewModel extends ChangeNotifier {
   Page1ViewModel({required StationServiceRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
-  /// Nombre de stations affichées au minimum, même si elles sont loin.
+  /// Nombre de stations affichées au minimum même si elles sont loin
   static const stationsMinimum = 5;
 
-  /// Au-delà, les prix de la carte sont retéléchargés.
+  /// Durée avant de retélécharger les stations de la carte
   static const _dureeCache = Duration(minutes: 10);
+
+  /// Écart à la médiane nationale pour passer au vert ou au rouge
+  static const ecartMediane = 0.02;
 
   final StationServiceRepository _repository;
   final Dio _dio = Dio(
@@ -48,20 +51,20 @@ class Page1ViewModel extends ChangeNotifier {
   Coordonnees? _position;
   String? _positionLabel;
   TypeCarburant _carburant = TypeCarburant.sp95;
-  // Filtre de la carte de l'accueil (null = tous les carburants).
+  // null pour Tous
   TypeCarburant? _filtreCarte;
-  // Accueil (true) ou liste des stations d'une adresse (false).
+  // false sur la page de liste
   bool _surCarte = true;
-  // Partie de la carte visible à l'écran, null tant qu'elle n'est pas prête.
   ZoneCarte? _zoneCarte;
   Timer? _debounceZone;
-  // Toutes les stations de France, téléchargées une fois pour la carte.
+  // Toutes les stations de France pour la carte
   ({List<Station> stations, DateTime chargeLe})? _toutesLesStations;
   Future<List<Station>>? _telechargement;
   List<Station> _stations = [];
   Station? _selected;
-  double _prixMin = 0;
-  double _prixMax = 0;
+  // Médianes nationales récupérées une fois par jour
+  ({DateTime jour, Map<TypeCarburant, double> medianes})? _medianes;
+  Future<Map<TypeCarburant, double>>? _telechargementMedianes;
   bool _isLoading = false;
   String? _errorMessage;
   int _requestId = 0;
@@ -86,11 +89,10 @@ class Page1ViewModel extends ChangeNotifier {
   bool get triParPrix => _triParPrix;
   List<AddressSuggestion> get suggestions => _suggestions;
 
-  /// Émet quand la carte de l'accueil doit revenir à sa position d'origine.
+  /// Émet quand la carte de l'accueil doit revenir à sa position d'origine
   Stream<void> get reinitialisationCarte => _reinitialisationCarte.stream;
 
-  /// Carburant des stations chargées : la liste en demande toujours un,
-  /// la carte peut les afficher toutes.
+  /// La carte peut afficher tous les carburants mais pas la liste
   TypeCarburant? get _carburantCharge => _surCarte ? _filtreCarte : _carburant;
 
   double? prixDe(Station station) {
@@ -116,27 +118,54 @@ class Page1ViewModel extends ChangeNotifier {
     return calculerTempsTrajetEnMinutes(km, 40);
   }
 
-  /// Vert, orange ou rouge, selon le prix par rapport aux autres stations.
-  PriceLevel? niveauPrix(Station station) {
-    final prix = prixDe(station);
-    if (prix == null) return null;
-    final ecart = _prixMax - _prixMin;
-    if (ecart <= 0) return PriceLevel.bas;
-    final ratio = (prix - _prixMin) / ecart;
-    if (ratio < 1 / 3) return PriceLevel.bas;
-    if (ratio < 2 / 3) return PriceLevel.moyen;
-    return PriceLevel.eleve;
+  /// Médiane du jour pour le carburant de la carte
+  double? get medianeDuJour {
+    final carburant = _filtreCarte;
+    if (carburant == null) return null;
+    return _medianes?.medianes[carburant];
   }
 
-  /// Barre de recherche ou bouton de localisation, on choisit une position.
+  /// Couleur selon l'écart à la médiane nationale ou null sans médiane
+  PriceLevel? niveauPrix(Station station) {
+    final carburant = _carburantCharge;
+    if (carburant == null) return null;
+    final prix = station.prixPourCarburant(carburant);
+    final mediane = _medianes?.medianes[carburant];
+    if (prix == null || mediane == null) return null;
+    final ecart = (prix - mediane) / mediane;
+    if (ecart <= -ecartMediane) return PriceLevel.bas;
+    if (ecart >= ecartMediane) return PriceLevel.eleve;
+    return PriceLevel.moyen;
+  }
+
+  Future<void> _chargerMedianes() async {
+    final maintenant = DateTime.now();
+    final aujourdhui = DateTime(
+      maintenant.year,
+      maintenant.month,
+      maintenant.day,
+    );
+    if (_medianes?.jour == aujourdhui) return;
+    try {
+      final medianes = await (_telechargementMedianes ??= _repository
+          .getMedianesNationales()
+          .whenComplete(() => _telechargementMedianes = null));
+      _medianes = (jour: aujourdhui, medianes: medianes);
+      _notify();
+    } on Object {
+      // Pastilles grises jusqu'au prochain essai
+    }
+  }
+
+  /// Position choisie avec la barre de recherche ou le bouton de localisation
   Future<void> selectLocation(String label, Coordonnees position) {
     _positionLabel = label;
     _position = position;
     return loadStations();
   }
 
-  /// Récupère la position GPS de l'utilisateur, pour proposer en premier
-  /// les adresses proches de lui. Sans permission, on ne fait rien.
+  /// Récupère la position GPS de l'utilisateur pour proposer en premier
+  /// les adresses proches de lui, ne fait rien sans permission
   Future<void> loadUserPosition() async {
     try {
       var permission = await Geolocator.checkPermission();
@@ -150,17 +179,17 @@ class Page1ViewModel extends ChangeNotifier {
       final p = await Geolocator.getCurrentPosition();
       final userPosition = (latitude: p.latitude, longitude: p.longitude);
       _userPosition = userPosition;
-      // Stations autour de l'utilisateur pour la carte de l'accueil, sauf
-      // s'il a déjà choisi une adresse pendant que le GPS cherchait.
+      // Stations autour de l'utilisateur pour la carte de l'accueil sauf
+      // s'il a déjà choisi une adresse pendant que le GPS cherchait
       if (_position == null) {
         await selectLocation('Autour de moi', userPosition);
       }
     } on Exception {
-      // GPS désactivé : la recherche marche quand même, sans priorité.
+      // Sans GPS la recherche marche quand même mais sans priorité
     }
   }
 
-  /// Appelée à chaque lettre tapée dans la barre de recherche.
+  /// Appelée à chaque lettre tapée dans la barre de recherche
   void searchAddress(String text) {
     _debounce?.cancel();
     final query = text.trim();
@@ -170,7 +199,7 @@ class Page1ViewModel extends ChangeNotifier {
       _notify();
       return;
     }
-    // On attend 400 ms sans frappe avant d'appeler l'API.
+    // On attend 400 ms sans frappe avant d'appeler l'API
     _debounce = Timer(const Duration(milliseconds: 400), () async {
       final requestId = ++_addressRequestId;
       try {
@@ -201,13 +230,12 @@ class Page1ViewModel extends ChangeNotifier {
     );
     final features = (response.data?['features'] as List<dynamic>?) ?? [];
     final results = [
-      for (final f in features.cast<Map<String, dynamic>>())
-        _parseFeature(f),
+      for (final f in features.cast<Map<String, dynamic>>()) _parseFeature(f),
     ];
     if (position == null) return [for (final r in results) r.suggestion];
 
-    // L'API trie surtout sur le texte : on enlève un peu de score aux
-    // adresses lointaines, sans que la distance écrase la pertinence
+    // L'API trie surtout sur le texte donc on enlève un peu de score aux
+    // adresses lointaines sans que la distance écrase la pertinence
     double rang(({AddressSuggestion suggestion, double score}) r) {
       final km = calculerDistanceKm(
         lat1: position.latitude,
@@ -238,26 +266,27 @@ class Page1ViewModel extends ChangeNotifier {
     );
   }
 
-
   /// "8 Boulevard du Port, 80000, Amiens" au lieu de
-  /// "8 Boulevard du Port 80000 Amiens".
+  /// "8 Boulevard du Port 80000 Amiens"
   String _formatLabel(Map<String, dynamic> properties) {
     final name = properties['name'] as String?;
     final postcode = properties['postcode'] as String?;
     final city = properties['city'] as String?;
-    // Un Set pour éviter "Amiens, 80000, Amiens" quand on cherche une ville.
-    final parts = <String?>{name, postcode, city}
-        .whereType<String>()
-        .where((p) => p.isNotEmpty);
+    // Un Set pour éviter "Amiens, 80000, Amiens" quand on cherche une ville
+    final parts = <String?>{
+      name,
+      postcode,
+      city,
+    }.whereType<String>().where((p) => p.isNotEmpty);
     if (parts.isEmpty) return properties['label'] as String? ?? '';
     return parts.join(', ');
   }
 
-  /// L'utilisateur choisit une adresse dans la liste.
+  /// L'utilisateur choisit une adresse dans la liste
   Future<void> selectSuggestion(AddressSuggestion s) {
     _suggestions = [];
     _surCarte = false;
-    // La liste reprend le carburant choisi sur la carte, s'il y en a un.
+    // On garde le carburant choisi sur la carte
     _carburant = _filtreCarte ?? _carburant;
     return selectLocation(
       s.label,
@@ -265,8 +294,8 @@ class Page1ViewModel extends ChangeNotifier {
     );
   }
 
-  /// Retour sur l'accueil après une recherche : on revient autour de
-  /// l'utilisateur, comme à l'ouverture de l'app.
+  /// Au retour sur l'accueil après une recherche on revient autour de
+  /// l'utilisateur comme à l'ouverture de l'app
   Future<void> reinitialiserPosition() async {
     _reinitialisationCarte.add(null);
     _surCarte = true;
@@ -274,22 +303,21 @@ class Page1ViewModel extends ChangeNotifier {
     if (userPosition != null) {
       return selectLocation('Autour de moi', userPosition);
     }
-    // Sans GPS, la carte revient à sa position par défaut : on affiche les
-    // stations de la zone visible.
+    // Sans GPS on recharge la zone par défaut de la carte
     _position = null;
     _positionLabel = null;
     _selected = null;
     return loadStations();
   }
 
-  /// Tri de la liste : les plus proches (false) ou les moins chères (true).
+  /// Trie la liste par distance ou par prix si triParPrix vaut true
   Future<void> setTriParPrix({required bool triParPrix}) async {
     if (_triParPrix == triParPrix) return;
     _triParPrix = triParPrix;
     await loadStations();
   }
 
-  /// Bouton de carburant (SP95, SP98, Gazole, E85, GPL).
+  /// Boutons de carburant de la page de liste
   Future<void> selectFuel(String bouton) async {
     final carburant = _carburantDepuisBouton(bouton);
     if (carburant == null) return;
@@ -297,31 +325,30 @@ class Page1ViewModel extends ChangeNotifier {
     await loadStations();
   }
 
-  /// Boutons de carburant de la carte de l'accueil (null = Tous).
+  /// Boutons de carburant de la carte avec null pour Tous
   Future<void> selectFiltreCarte(String? bouton) async {
     _filtreCarte = bouton == null ? null : _carburantDepuisBouton(bouton);
     await loadStations();
   }
 
-  /// La carte a bougé (déplacement ou zoom) : on charge les stations de la
-  /// zone visible. Plus on dézoome, plus il y en a.
+  /// Appelée quand la carte bouge ou zoome
   void zoneCarteChangee(ZoneCarte zone) {
     _zoneCarte = zone;
     if (!_surCarte) return;
-    // On attend que la carte s'arrête de bouger avant de filtrer.
+    // On attend que la carte s'arrête
     _debounceZone?.cancel();
     _debounceZone = Timer(const Duration(milliseconds: 150), loadStations);
   }
 
-  /// On touche une pastille sur la carte : sa fiche s'ouvre
-  /// (null la ferme).
+  /// Ouvre la fiche de la pastille touchée ou la ferme avec null
   void selectStation(Station? station) {
     _selected = station;
     _notify();
   }
 
-  /// Cherche les stations autour de la position, pour le carburant choisi.
+  /// Cherche les stations autour de la position pour le carburant choisi
   Future<void> loadStations() async {
+    unawaited(_chargerMedianes());
     final position = _position;
     final zone = _zoneCarte;
     if (_surCarte && zone != null) return _loadStationsZone(zone);
@@ -330,7 +357,7 @@ class Page1ViewModel extends ChangeNotifier {
       return;
     }
 
-    // Si on change vite de choix, seule la dernière réponse compte.
+    // Si on change vite de choix seule la dernière réponse compte
     final requestId = ++_requestId;
     _isLoading = true;
     _errorMessage = null;
@@ -343,20 +370,20 @@ class Page1ViewModel extends ChangeNotifier {
         carburant: _carburantCharge,
         triParPrix: _triParPrix,
       );
-      // Peu de stations autour : on prend les plus proches, même loin.
+      // Peu de stations autour donc on prend les plus proches même loin
       if (result.length < stationsMinimum) {
         try {
           result = await _stationsLesPlusProches(position);
         } on Object {
-          // On garde les quelques stations déjà trouvées.
+          // On garde les quelques stations déjà trouvées
           if (result.isEmpty) rethrow;
         }
       }
       if (requestId != _requestId) return;
       _applyResult(result);
     } on Object {
-      // Object et pas Exception : une réponse mal formée lève une TypeError,
-      // sinon le chargement ne s'arrêterait jamais.
+      // Object et pas Exception car une réponse mal formée lève une
+      // TypeError et le chargement ne s'arrêterait jamais
       if (requestId != _requestId) return;
       _stations = [];
       _selected = null;
@@ -367,15 +394,14 @@ class Page1ViewModel extends ChangeNotifier {
     _notify();
   }
 
-  /// Stations de la partie visible de la carte de l'accueil.
+  /// Stations de la zone visible de la carte
   Future<void> _loadStationsZone(ZoneCarte zone) async {
     final requestId = ++_requestId;
     _errorMessage = null;
 
     final toutes = _toutesLesStations;
     if (toutes != null) {
-      // Déjà téléchargées : on filtre tout de suite, même si les prix ont
-      // un peu vieilli, sans attendre l'API.
+      // Déjà téléchargées donc affichées tout de suite même un peu anciennes
       _isLoading = false;
       _applyResult(_dansZone(toutes.stations, zone));
       _notify();
@@ -383,8 +409,7 @@ class Page1ViewModel extends ChangeNotifier {
     } else {
       _isLoading = true;
       _notify();
-      // Le téléchargement complet prend plusieurs secondes : en attendant,
-      // une petite requête affiche les stations les plus proches.
+      // On affiche les plus proches en attendant le téléchargement complet
       unawaited(_loadApercuZone(zone, requestId));
     }
 
@@ -394,10 +419,10 @@ class Page1ViewModel extends ChangeNotifier {
           .whenComplete(() => _telechargement = null));
       _toutesLesStations = (stations: stations, chargeLe: DateTime.now());
       if (requestId != _requestId) return;
-      // La carte a pu bouger pendant le téléchargement.
+      // La carte a pu bouger entre-temps
       _applyResult(_dansZone(stations, _zoneCarte ?? zone));
     } on Object {
-      // On garde les pastilles déjà affichées.
+      // On garde les pastilles affichées
       if (requestId != _requestId) return;
       if (toutes == null) _errorMessage = 'Impossible de charger les stations.';
     }
@@ -406,8 +431,7 @@ class Page1ViewModel extends ChangeNotifier {
     _notify();
   }
 
-  /// Les stations les plus proches du centre de [zone], en attendant que
-  /// toutes les stations soient téléchargées.
+  /// Stations proches du centre en attendant le téléchargement complet
   Future<void> _loadApercuZone(ZoneCarte zone, int requestId) async {
     try {
       final result = await _repository.getStationsDansZone(
@@ -417,16 +441,15 @@ class Page1ViewModel extends ChangeNotifier {
         est: zone.est,
         carburant: _carburantCharge,
       );
-      // Inutile si la carte a bougé ou si tout est déjà téléchargé.
+      // Trop tard si la carte a bougé ou si tout est arrivé
       if (requestId != _requestId || _toutesLesStations != null) return;
       _applyResult(result);
       _notify();
     } on Object {
-      // Le téléchargement complet prendra le relais.
+      // Le téléchargement complet prendra le relais
     }
   }
 
-  /// Stations de [zone] qui proposent le carburant choisi sur la carte.
   List<Station> _dansZone(List<Station> stations, ZoneCarte zone) {
     final carburant = _carburantCharge;
     return [
@@ -440,7 +463,7 @@ class Page1ViewModel extends ChangeNotifier {
     ];
   }
 
-  /// Les [stationsMinimum] stations les plus proches, sans limite de distance.
+  /// Les [stationsMinimum] stations les plus proches sans limite de distance
   Future<List<Station>> _stationsLesPlusProches(Coordonnees position) async {
     final result = await _repository.getStationsProches(
       latitude: position.latitude,
@@ -452,24 +475,21 @@ class Page1ViewModel extends ChangeNotifier {
     );
     if (_triParPrix) {
       result.sort(
-        (a, b) => (prixDe(a) ?? double.infinity)
-            .compareTo(prixDe(b) ?? double.infinity),
+        (a, b) => (prixDe(a) ?? double.infinity).compareTo(
+          prixDe(b) ?? double.infinity,
+        ),
       );
     }
     return result;
   }
 
   void _applyResult(List<Station> result) {
-    // Sans filtre, on garde aussi les stations sans prix connu.
+    // Avec Tous on garde aussi les stations sans prix
     _stations = _carburantCharge == null
         ? result
         : result.where((s) => prixDe(s) != null).toList();
 
-    final prix = _stations.map(prixDe).whereType<double>();
-    _prixMin = prix.isEmpty ? 0 : prix.reduce(min);
-    _prixMax = prix.isEmpty ? 0 : prix.reduce(max);
-
-    // La fiche ouverte reste ouverte si la station est encore affichée.
+    // La fiche reste ouverte si la station est encore là
     final selected = _selected;
     _selected = selected == null
         ? null

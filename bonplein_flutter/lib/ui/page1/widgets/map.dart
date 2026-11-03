@@ -23,26 +23,23 @@ class MapWidget extends StatefulWidget {
 }
 
 const _zoomParDefaut = 13.0;
-// Position de la carte à l'ouverture, et sans GPS.
+// Toulouse si pas de GPS
 const _centreParDefaut = LatLng(43.604, 1.444);
 
-// Une bulle remplace les pastilles quand au moins 5 stations tombent dans
-// la même case de 60 px à l'écran.
+// Une bulle à partir de 5 stations dans une case de 60 px
 const _stationsMinParBulle = 5;
 const _tailleCase = 60.0;
-// À partir de ce zoom, chaque station a sa pastille.
 const _zoomSansBulle = 15;
 
 class _MapWidgetState extends State<MapWidget> {
   Position? position;
-  // Chaque valeur envoyée recentre la carte sur l'utilisateur
-  // avec ce zoom (null = garder le zoom actuel).
+  // Chaque valeur envoyée recentre la carte sur l'utilisateur avec ce zoom
+  // ou garde le zoom actuel avec null
   final _recentrerController = StreamController<double?>();
   final _mapController = MapController();
   late final StreamSubscription<void> _reinitialisationSubscription;
 
-  // Les cases ne changent qu'avec le zoom ou les stations : inutile de
-  // les recalculer à chaque image quand on déplace la carte.
+  // Recalculé seulement quand le zoom ou les stations changent
   List<Station>? _stationsGroupees;
   int? _zoomGroupes;
   List<List<Station>> _groupes = [];
@@ -63,9 +60,8 @@ class _MapWidgetState extends State<MapWidget> {
     super.dispose();
   }
 
-  /// Remet la carte comme à l'ouverture : nord en haut, centrée sur
-  /// l'utilisateur au zoom par défaut, ou sur la position par défaut
-  /// sans GPS.
+  /// Remet la carte comme à l'ouverture avec le nord en haut et centrée
+  /// sur l'utilisateur au zoom par défaut
   void _reinitialiser() {
     _mapController.rotate(0);
     if (position == null) {
@@ -75,7 +71,7 @@ class _MapWidgetState extends State<MapWidget> {
     }
   }
 
-  /// Range les stations par case de [_tailleCase] px au zoom actuel.
+  /// Regroupe les stations par case à l'écran
   List<List<Station>> _grouper(List<Station> stations, MapCamera camera) {
     final zoom = camera.zoom.floor();
     if (identical(stations, _stationsGroupees) && zoom == _zoomGroupes) {
@@ -88,8 +84,7 @@ class _MapWidgetState extends State<MapWidget> {
         for (final s in stations) [s],
       ];
     }
-    // Les positions en pixels au zoom entier ne bougent pas quand on déplace
-    // la carte : les bulles restent stables.
+    // Au zoom entier les cases ne bougent pas quand on déplace la carte
     final cases = <(int, int), List<Station>>{};
     for (final s in stations) {
       final p = camera.projectAtZoom(
@@ -123,7 +118,7 @@ class _MapWidgetState extends State<MapWidget> {
       width: 40,
       height: 40,
       child: GestureDetector(
-        // On zoome juste assez pour voir toutes les stations de la bulle.
+        // Zoome sur les stations de la bulle
         onTap: () => _mapController.fitCamera(
           CameraFit.coordinates(
             coordinates: points,
@@ -138,7 +133,6 @@ class _MapWidgetState extends State<MapWidget> {
     );
   }
 
-  /// Couleur de la station la moins chère du groupe.
   PriceLevel? _niveauMoinsChere(List<Station> groupe) {
     Station? moinsChere;
     double? prixMin;
@@ -187,7 +181,7 @@ class _MapWidgetState extends State<MapWidget> {
           options: MapOptions(
             initialCenter: _centreParDefaut,
             initialZoom: _zoomParDefaut,
-            // Toucher la carte à côté d'une pastille ferme la fiche.
+            // Toucher la carte à côté d'une pastille ferme la fiche
             onTap: (_, _) => widget.viewModel.selectStation(null),
             onMapReady: () => _envoyerZone(_mapController.camera),
             onPositionChanged: (camera, _) => _envoyerZone(camera),
@@ -200,7 +194,7 @@ class _MapWidgetState extends State<MapWidget> {
             ListenableBuilder(
               listenable: widget.viewModel,
               builder: (context, _) {
-                // Builder pour être reconstruit quand la carte bouge.
+                // Reconstruit quand la carte bouge
                 return Builder(
                   builder: (context) {
                     final groupes = _grouper(
@@ -208,7 +202,7 @@ class _MapWidgetState extends State<MapWidget> {
                       MapCamera.of(context),
                     );
                     return MarkerLayer(
-                      // Pompes et bulles restent droites quand la carte tourne.
+                      // Restent droites quand la carte tourne
                       rotate: true,
                       markers: [
                         for (final groupe in groupes)
@@ -230,13 +224,13 @@ class _MapWidgetState extends State<MapWidget> {
                 return MarkerLayer(
                   rotate: true,
                   markers: [
-                    // Au-dessus des pastilles et des bulles.
+                    // La fiche passe au-dessus des pastilles
                     if (selected != null)
                       Marker(
                         point: LatLng(selected.latitude, selected.longitude),
                         width: _StationFiche.largeur,
                         height: _StationFiche.hauteur,
-                        // La pointe de la fiche juste au-dessus de la pastille.
+                        // La pointe de la fiche juste au-dessus de la pastille
                         alignment: Alignment.topCenter,
                         child: _StationFiche(
                           station: selected,
@@ -250,18 +244,19 @@ class _MapWidgetState extends State<MapWidget> {
             CurrentLocationLayer(
               alignPositionStream: _recentrerController.stream,
               alignPositionOnUpdate: AlignOnUpdate.once,
-            ), // User location
-            // En dernier pour rester au-dessus des marqueurs.
+            ),
+            // En dernier pour rester au-dessus des marqueurs
             ListenableBuilder(
               listenable: widget.viewModel,
               builder: (context, _) => _BoutonInfo(
                 avecPrix: widget.viewModel.filtreCarte != null,
+                mediane: widget.viewModel.medianeDuJour,
               ),
             ),
             const MapCompass(icon: _CompassIcon()),
             Align(
               alignment: Alignment.bottomRight,
-              // Sous la boussole (10 de padding + 48 de bouton).
+              // Sous la boussole avec 10 de marge et 48 de bouton
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 62, 10, 10),
                 child: IconButton(
@@ -288,7 +283,7 @@ class _MapWidgetState extends State<MapWidget> {
   }
 }
 
-// Style commun aux boutons ronds posés sur la carte.
+// Style commun aux boutons ronds posés sur la carte
 const _boutonCarteDecoration = BoxDecoration(
   color: AppColors.blanc,
   shape: BoxShape.circle,
@@ -312,8 +307,8 @@ Color _couleurPrix(PriceLevel? niveau) => switch (niveau) {
 String _formatNombre(double valeur, int decimales) =>
     valeur.toStringAsFixed(decimales).replaceAll('.', ',');
 
-/// Petite fiche en bulle au-dessus de la pastille touchée.
-/// La toucher ouvre la page de la station.
+/// Petite fiche en bulle au-dessus de la pastille touchée qui ouvre la page
+/// de la station
 class _StationFiche extends StatelessWidget {
   const _StationFiche({required this.station, required this.viewModel});
 
@@ -406,14 +401,14 @@ class _StationFiche extends StatelessWidget {
           size: const Size(16, 8),
           painter: _PointeFichePainter(),
         ),
-        // Moitié de la pastille (36 / 2) + un petit écart.
+        // Moitié de la pastille plus un petit écart
         const SizedBox(height: 20),
       ],
     );
   }
 }
 
-/// Petit triangle sous la fiche, qui pointe vers la pastille.
+/// Petit triangle sous la fiche qui pointe vers la pastille
 class _PointeFichePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -428,8 +423,8 @@ class _PointeFichePainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-/// Pastille ronde avec une pompe, centrée sur la station, colorée
-/// selon le prix par rapport aux autres stations.
+/// Pastille ronde avec une pompe centrée sur la station et colorée selon
+/// son prix
 class _StationMarker extends StatelessWidget {
   const _StationMarker({required this.niveau});
 
@@ -461,13 +456,12 @@ class _StationMarker extends StatelessWidget {
   }
 }
 
-/// Bouton « i » en bas à gauche de la carte : il ouvre la légende des
-/// couleurs. La mention OpenStreetMap reste toujours visible à côté, comme
-/// le demandent ses conditions d'utilisation.
+/// Ouvre la légende et laisse la mention OpenStreetMap visible
 class _BoutonInfo extends StatefulWidget {
-  const _BoutonInfo({required this.avecPrix});
+  const _BoutonInfo({required this.avecPrix, required this.mediane});
 
   final bool avecPrix;
+  final double? mediane;
 
   @override
   State<_BoutonInfo> createState() => _BoutonInfoState();
@@ -487,7 +481,7 @@ class _BoutonInfoState extends State<_BoutonInfo> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (_ouvert) ...[
-              _Legende(avecPrix: widget.avecPrix),
+              _Legende(avecPrix: widget.avecPrix, mediane: widget.mediane),
               const SizedBox(height: AppSpacing.xs),
             ],
             Row(
@@ -527,12 +521,14 @@ class _BoutonInfoState extends State<_BoutonInfo> {
   }
 }
 
-/// Explique le code couleur des pastilles.
 class _Legende extends StatelessWidget {
-  const _Legende({required this.avecPrix});
+  const _Legende({required this.avecPrix, required this.mediane});
 
-  // Faux quand « Tous » est choisi : les pastilles sont grises.
+  // false avec Tous
   final bool avecPrix;
+  final double? mediane;
+
+  static final pourcentage = '${(Page1ViewModel.ecartMediane * 100).round()} %';
 
   @override
   Widget build(BuildContext context) {
@@ -548,7 +544,7 @@ class _Legende extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xs),
-      constraints: const BoxConstraints(maxWidth: 200),
+      constraints: const BoxConstraints(maxWidth: 230),
       decoration: BoxDecoration(
         color: AppColors.blanc.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(8),
@@ -565,11 +561,32 @@ class _Legende extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           if (avecPrix) ...[
-            _LigneLegende(PriceLevel.bas, 'Moins cher', style),
-            _LigneLegende(PriceLevel.moyen, 'Prix moyen', style),
-            _LigneLegende(PriceLevel.eleve, 'Plus cher', style),
+            _LigneLegende(
+              PriceLevel.bas,
+              'Au moins $pourcentage moins cher',
+              style,
+            ),
+            _LigneLegende(PriceLevel.moyen, 'Proche de la médiane', style),
+            _LigneLegende(
+              PriceLevel.eleve,
+              'Au moins $pourcentage plus cher',
+              style,
+            ),
             const SizedBox(height: 2),
-            Text('Comparé aux stations visibles', style: note),
+            // Rétrécit plutôt que de passer à la ligne
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                mediane == null
+                    ? 'Comparé à la médiane nationale du jour'
+                    : 'Médiane nationale du jour : '
+                          '${_formatNombre(mediane!, 3)} €/L',
+                style: note,
+                maxLines: 1,
+                softWrap: false,
+              ),
+            ),
           ] else
             _LigneLegende(
               null,
@@ -612,8 +629,7 @@ class _LigneLegende extends StatelessWidget {
   }
 }
 
-/// Bulle qui remplace plusieurs pastilles proches, avec leur nombre,
-/// colorée selon la station la moins chère qu'elle contient.
+/// Regroupe des pastilles proches avec la couleur de la moins chère
 class _ClusterBulle extends StatelessWidget {
   const _ClusterBulle({required this.nombre, required this.niveau});
 

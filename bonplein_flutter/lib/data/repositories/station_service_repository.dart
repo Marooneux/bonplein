@@ -19,19 +19,17 @@ class StationServiceRepository {
           );
   final StationServiceApi _api;
 
-  /// Champs utilisés par [_mapperVersStation] : la réponse est 4 fois plus
-  /// légère qu'avec tous les champs.
+  /// Seulement les champs utiles pour une réponse 4 fois plus légère
   static const _champsStation =
       'id,latitude,longitude,cp,pop,adresse,ville,geom,'
       'gazole_prix,gazole_maj,sp95_prix,sp95_maj,sp98_prix,sp98_maj,'
       'e10_prix,e10_maj,e85_prix,e85_maj,gplc_prix,gplc_maj,services_service';
 
-  /// Recherche les stations situées dans un rayon (en km) autour des
-  /// coordonnées GPS fournies. Si un [carburant] est spécifié, seules les
-  /// stations proposant ce carburant sont retournées, les résultats sont triés
-  /// par prix croissant, sauf si [triParPrix] vaut false : elles sont alors
-  /// triées de la plus proche à la plus éloignée. Si [rayonKm] vaut null,
-  /// il n'y a pas de limite de distance.
+  /// Stations dans un rayon en km autour des coordonnées GPS
+  ///
+  /// Avec un [carburant] seules les stations qui le proposent sont renvoyées
+  /// et triées par prix croissant, ou de la plus proche à la plus éloignée
+  /// si [triParPrix] vaut false. Sans [rayonKm] la distance n'est pas limitée
   Future<List<Station>> getStationsProches({
     required double latitude,
     required double longitude,
@@ -64,18 +62,29 @@ class StationServiceRepository {
     return reponse.results.map(_mapperVersStation).toList();
   }
 
-  /// Toutes les stations de France (environ 10 000), en une seule requête
-  /// d'environ 1,3 Mo compressé.
+  /// Prix médian de chaque carburant en France calculé par l'API
+  Future<Map<TypeCarburant, double>> getMedianesNationales() async {
+    final reponse = await _api.getRecords(
+      select: [
+        for (final t in TypeCarburant.values)
+          'median(${t.champApi}) as ${t.champApi}',
+      ].join(', '),
+      limit: 1,
+    );
+    if (reponse.results.isEmpty) return {};
+    // L'API renvoie les médianes dans les champs de prix
+    final medianes = _mapperVersStation(reponse.results.first);
+    return {for (final c in medianes.carburants) c.type: c.prix};
+  }
+
+  /// Les 10 000 stations de France en une seule requête
   Future<List<Station>> getToutesLesStations() async {
     final reponse = await _api.exportRecords(select: _champsStation);
     return reponse.map(_mapperVersStation).toList();
   }
 
-  /// Les [limit] stations les plus proches du centre du rectangle
-  /// [sud]-[nord], [ouest]-[est] (la partie visible d'une carte). Si un
-  /// [carburant] est spécifié, seules les stations proposant ce carburant
-  /// sont retournées. Une seule petite requête : de quoi afficher vite
-  /// quelques stations en attendant [getToutesLesStations].
+  /// Les [limit] stations les plus proches du centre de la zone pour
+  /// afficher vite quelque chose
   Future<List<Station>> getStationsDansZone({
     required double sud,
     required double ouest,
@@ -100,7 +109,7 @@ class StationServiceRepository {
     return reponse.results.map(_mapperVersStation).toList();
   }
 
-  /// Recherche les stations d'un département (ex: "31", "75", "13").
+  /// Stations d'un département comme "31", "75" ou "13"
   Future<List<Station>> getStationsParDepartement({
     required String codeDepartement,
     TypeCarburant? carburant,
@@ -123,7 +132,7 @@ class StationServiceRepository {
     return reponse.results.map(_mapperVersStation).toList();
   }
 
-  /// Recherche les stations dans une ville donnée.
+  /// Stations d'une ville
   Future<List<Station>> getStationsParVille({
     required String ville,
     TypeCarburant? carburant,
@@ -147,7 +156,7 @@ class StationServiceRepository {
   }
 
   /// Convertit le modèle de l'API [StationService] vers le modèle domaine
-  /// [Station].
+  /// [Station]
   Station _mapperVersStation(StationService dto) {
     final carburants = <Carburant>[];
 
@@ -216,8 +225,8 @@ class StationServiceRepository {
     );
   }
 
-  /// Renvoie les coordonnées de secours sous forme de chaîne entière (ex:
-  /// "4818300" -> 48.183).
+  /// Convertit les coordonnées de secours écrites en entier comme "4818300"
+  /// qui donne 48.183
   double _parserCoordonnee(String? valeur) {
     if (valeur == null || valeur.isEmpty) return 0;
     final parsed = double.tryParse(valeur);
