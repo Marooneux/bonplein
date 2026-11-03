@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="98f7129f-a36c-4410-affc-d588234accad" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/bonplein_flutter/lib/ui/pageInfoStation/widgets/widget_services_station.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Dart_Packages.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bonplein_flutter/lib/ui/pageInfoStation/page_info_station.dart" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/lib/ui/pageInfoStation/page_info_station.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/bonplein_flutter/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bonplein_flutter/lib/ui/pageInfoStation/widgets/widget_services_station.dart" beforeDir="false" afterPath="$PROJECT_DIR$/bonplein_flutter/lib/ui/pageInfoStation/widgets/widget_services_station.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

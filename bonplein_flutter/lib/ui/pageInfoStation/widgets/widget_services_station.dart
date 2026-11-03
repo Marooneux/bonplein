@@ -7,12 +7,12 @@ class ServicesStation extends StatefulWidget {
   const ServicesStation({
     super.key,
     required this.services,
-    this.nombreVisible = 3,
+    this.nombreVisible = 5,
   });
 
   final List<String> services;
 
-  /// Nombre de services affichés avant de déplier
+  /// Nombre d'icônes affichées avant de déplier
   final int nombreVisible;
 
   @override
@@ -21,6 +21,8 @@ class ServicesStation extends StatefulWidget {
 
 class _ServicesStationState extends State<ServicesStation> {
   bool _deplie = false;
+
+  static const double _taille = 48;
 
   /// Choisit une icône selon des mots-clés du service
   static IconData _icone(String service) {
@@ -40,7 +42,8 @@ class _ServicesStationState extends State<ServicesStation> {
     if (s.contains('location')) return Icons.car_rental;
     if (s.contains('wifi')) return Icons.wifi;
     if (s.contains('restauration')) return Icons.restaurant_outlined;
-    if (s.contains('réparation') || s.contains('reparation') ||
+    if (s.contains('réparation') ||
+        s.contains('reparation') ||
         s.contains('entretien')) {
       return Icons.build_outlined;
     }
@@ -72,92 +75,86 @@ class _ServicesStationState extends State<ServicesStation> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Services proposés', style: AppTextStyle.titreCarte),
-            const SizedBox(height: AppSpacing.xs),
+            const SizedBox(height: AppSpacing.sm),
             if (services.isEmpty)
               Text(
                 'Aucun service renseigné',
                 style: AppTextStyle.texteSecondaire,
               )
             else
-              _buildListe(services),
+              _buildIcones(services),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildListe(List<String> services) {
-    final visibles = services.take(widget.nombreVisible).toList();
-    final autres = services.skip(widget.nombreVisible).toList();
+  Widget _buildIcones(List<String> services) {
+    final aDesAutres = services.length > widget.nombreVisible;
+    final affiches = _deplie
+        ? services
+        : services.take(widget.nombreVisible).toList();
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...visibles.map(_ligne),
-
-        // Les services supplémentaires apparaissent avec une animation
-        AnimatedSize(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          alignment: Alignment.topCenter,
-          child: _deplie
-              ? Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: autres.map(_ligne).toList(),
-          )
-              : const SizedBox(width: double.infinity),
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      alignment: Alignment.center,
+      child: SizedBox(
+        width: double.infinity,
+        child: Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            ...affiches.map(_pastille),
+            if (aDesAutres) _pastilleFleche(services.length - widget.nombreVisible),
+          ],
         ),
-
-        // Bouton flèche, seulement s'il y a des services en plus
-        if (autres.isNotEmpty)
-          InkWell(
-            onTap: () => setState(() => _deplie = !_deplie),
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            child: Padding(
-              padding: const EdgeInsets.only(top: AppSpacing.xs),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _deplie ? 'Voir moins' : 'Voir ${autres.length} autres',
-                    style: AppTextStyle.label.copyWith(
-                      color: AppColors.vert,
-                      letterSpacing: 0,
-                    ),
-                  ),
-                  AnimatedRotation(
-                    turns: _deplie ? 0.5 : 0,
-                    duration: const Duration(milliseconds: 250),
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: AppColors.vert,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
+      ),
     );
   }
 
-  Widget _ligne(String service) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.vert.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppRadius.sm / 2),
-            ),
-            child: Icon(_icone(service), size: 18, color: AppColors.vert),
+  /// Pastille ronde avec l'icône. Un appui affiche le nom du service.
+  Widget _pastille(String service) {
+    return Tooltip(
+      message: service,
+      triggerMode: TooltipTriggerMode.tap,
+      showDuration: const Duration(seconds: 3),
+      child: Container(
+        width: _taille,
+        height: _taille,
+        decoration: BoxDecoration(
+          color: AppColors.vert.withValues(alpha: 0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(_icone(service), size: 22, color: AppColors.vert),
+      ),
+    );
+  }
+
+  /// Pastille ronde avec la flèche pour voir / masquer les autres services.
+  Widget _pastilleFleche(int nombreCaches) {
+    return Tooltip(
+      message: _deplie ? 'Voir moins' : 'Voir $nombreCaches autres services',
+      child: InkWell(
+        onTap: () => setState(() => _deplie = !_deplie),
+        customBorder: const CircleBorder(),
+        child: Container(
+          width: _taille,
+          height: _taille,
+          decoration: BoxDecoration(
+            color: AppColors.neutral100,
+            shape: BoxShape.circle,
+            border: Border.all(color: AppColors.neutral200),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text(service, style: AppTextStyle.body.copyWith(fontSize: 14))),
-        ],
+          child: AnimatedRotation(
+            turns: _deplie ? 0.5 : 0,
+            duration: const Duration(milliseconds: 250),
+            child: const Icon(
+              Icons.keyboard_arrow_down,
+              color: AppColors.neutral700,
+            ),
+          ),
+        ),
       ),
     );
   }
