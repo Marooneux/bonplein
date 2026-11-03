@@ -28,7 +28,7 @@ TypeCarburant? _carburantDepuisBouton(String bouton) {
 
 class Page1ViewModel extends ChangeNotifier {
   Page1ViewModel({required StationServiceRepository repository})
-      : _repository = repository;
+    : _repository = repository;
 
   /// Nombre de stations affichées au minimum, même si elles sont loin.
   static const stationsMinimum = 5;
@@ -146,9 +146,10 @@ class Page1ViewModel extends ChangeNotifier {
     _debounce = Timer(const Duration(milliseconds: 400), () async {
       final requestId = ++_addressRequestId;
       try {
-        final result = await _fetchAddresses(query);
+        final results = await _fetchAddresses(query);
         if (requestId != _addressRequestId) return;
-        _suggestions = result;
+        _suggestions = results;
+        print(_suggestions);
       } on Exception {
         if (requestId != _addressRequestId) return;
         _suggestions = [];
@@ -173,8 +174,7 @@ class Page1ViewModel extends ChangeNotifier {
     );
     final features = (response.data?['features'] as List<dynamic>?) ?? [];
     final results = [
-      for (final f in features.cast<Map<String, dynamic>>())
-        _parseFeature(f),
+      for (final f in features.cast<Map<String, dynamic>>()) _parseFeature(f),
     ];
     if (position == null) return [for (final r in results) r.suggestion];
 
@@ -210,7 +210,6 @@ class Page1ViewModel extends ChangeNotifier {
     );
   }
 
-
   /// "8 Boulevard du Port, 80000, Amiens" au lieu de
   /// "8 Boulevard du Port 80000 Amiens".
   String _formatLabel(Map<String, dynamic> properties) {
@@ -218,9 +217,11 @@ class Page1ViewModel extends ChangeNotifier {
     final postcode = properties['postcode'] as String?;
     final city = properties['city'] as String?;
     // Un Set pour éviter "Amiens, 80000, Amiens" quand on cherche une ville.
-    final parts = <String?>{name, postcode, city}
-        .whereType<String>()
-        .where((p) => p.isNotEmpty);
+    final parts = <String?>{
+      name,
+      postcode,
+      city,
+    }.whereType<String>().where((p) => p.isNotEmpty);
     if (parts.isEmpty) return properties['label'] as String? ?? '';
     return parts.join(', ');
   }
@@ -312,8 +313,9 @@ class Page1ViewModel extends ChangeNotifier {
     );
     if (_triParPrix) {
       result.sort(
-        (a, b) => (prixDe(a) ?? double.infinity)
-            .compareTo(prixDe(b) ?? double.infinity),
+        (a, b) => (prixDe(a) ?? double.infinity).compareTo(
+          prixDe(b) ?? double.infinity,
+        ),
       );
     }
     return result;

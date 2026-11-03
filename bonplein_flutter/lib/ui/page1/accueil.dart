@@ -7,6 +7,7 @@ import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
 import 'package:bonplein_flutter/ui/page1/widgets/map.dart';
 import 'package:bonplein_flutter/ui/page1/widgets/search_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:bonplein_flutter/ui/core/widgets/app_search_bar.dart';
 
 class Accueil extends StatefulWidget {
   const Accueil({super.key});
@@ -16,8 +17,9 @@ class Accueil extends StatefulWidget {
 }
 
 class _AccueilState extends State<Accueil> {
-  late final Page1ViewModel _viewModel =
-      Page1ViewModel(repository: StationServiceRepository());
+  late final Page1ViewModel _viewModel = Page1ViewModel(
+    repository: StationServiceRepository(),
+  );
 
   @override
   void initState() {
@@ -37,9 +39,14 @@ class _AccueilState extends State<Accueil> {
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.xs),
-          SearchBarWidget(
-            viewModel: _viewModel,
-            hintText: 'Rechercher une adresse',
+          AppSearchBar(
+            hintText: 'Chercher une station',
+            onChanged: _viewModel.searchAddress,
+            suggestionsListenable: _viewModel,
+            suggestionsProvider: () =>
+                _viewModel.suggestions.map((s) => s.label).toList(),
+            onSuggestionSelected: (i) =>
+                _viewModel.selectSuggestion(_viewModel.suggestions[i]),
           ),
           const FuelFilterWidget(),
           const SizedBox(height: AppSpacing.xs),
