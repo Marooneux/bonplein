@@ -166,6 +166,15 @@ class Page1ViewModel extends ChangeNotifier {
     _notify();
   }
 
+  /// Ouvre les réglages du téléphone pour corriger le problème de GPS.
+  Future<void> openLocationSettings() async {
+    if (_locationProblem == LocationProblem.servicesDisabled) {
+      await Geolocator.openLocationSettings();
+    } else {
+      await Geolocator.openAppSettings();
+    }
+  }
+
   /// Appelée à chaque lettre tapée dans la barre de recherche.
   void searchAddress(String text) {
     _debounce?.cancel();
