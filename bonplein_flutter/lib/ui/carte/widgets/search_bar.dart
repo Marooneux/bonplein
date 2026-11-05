@@ -1,18 +1,18 @@
 import 'dart:async';
-import 'package:bonplein_flutter/ui/page1/stations_proches_page.dart';
-import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
+import 'package:bonplein_flutter/ui/carte/stations_proches_page.dart';
+import 'package:bonplein_flutter/ui/carte/view_models/carte_view_model.dart';
 import 'package:flutter/material.dart';
 
 class SearchBarWidget extends StatefulWidget {
+  final Page1ViewModel viewModel;
+  final String hintText;
+  static const radius12 = Radius.circular(12);
+
   const SearchBarWidget({
     required this.viewModel,
     required this.hintText,
     super.key,
   });
-
-  final Page1ViewModel viewModel;
-  final String hintText;
-  static const radius12 = Radius.circular(12);
 
   @override
   State<SearchBarWidget> createState() => _SearchBarWidgetState();

@@ -1,4 +1,4 @@
-import 'package:bonplein_flutter/ui/page1/widgets/map.dart';
+import 'package:bonplein_flutter/ui/carte/widgets/map.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_test/flutter_test.dart';

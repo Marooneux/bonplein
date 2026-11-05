@@ -2,8 +2,8 @@ import 'package:bonplein_flutter/domain/models/station_service.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_colors.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_text_style.dart';
-import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
-import 'package:bonplein_flutter/ui/page1/widgets/station_card.dart';
+import 'package:bonplein_flutter/ui/carte/view_models/carte_view_model.dart';
+import 'package:bonplein_flutter/ui/carte/widgets/station_card.dart';
 import 'package:bonplein_flutter/ui/pageInfoStation/page_info_station.dart';
 import 'package:flutter/material.dart';
 

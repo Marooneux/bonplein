@@ -3,20 +3,19 @@ import 'dart:async';
 import 'package:bonplein_flutter/data/repositories/station_service_repository.dart';
 import 'package:bonplein_flutter/ui/core/themes/app_spacing.dart';
 import 'package:bonplein_flutter/ui/core/widgets/widget_filtres_carburant.dart';
-import 'package:bonplein_flutter/ui/page1/view_models/page1_view_model.dart';
-import 'package:bonplein_flutter/ui/page1/widgets/map.dart';
-import 'package:bonplein_flutter/ui/page1/widgets/search_bar.dart';
+import 'package:bonplein_flutter/ui/carte/view_models/carte_view_model.dart';
+import 'package:bonplein_flutter/ui/carte/widgets/map.dart';
 import 'package:flutter/material.dart';
 import 'package:bonplein_flutter/ui/core/widgets/app_search_bar.dart';
 
-class Accueil extends StatefulWidget {
-  const Accueil({super.key});
+class CarteScreen extends StatefulWidget {
+  const CarteScreen({super.key});
 
   @override
-  State<Accueil> createState() => _AccueilState();
+  State<CarteScreen> createState() => _CarteScreenState();
 }
 
-class _AccueilState extends State<Accueil> {
+class _CarteScreenState extends State<CarteScreen> {
   late final Page1ViewModel _viewModel = Page1ViewModel(
     repository: StationServiceRepository(),
   );
